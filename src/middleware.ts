@@ -1,11 +1,12 @@
 import { MiddlewareConfig, NextRequest, NextResponse } from "next/server"
 
+import { AUTH_TOKEN_NAME } from "./constants/AUTH_TOKEN_NAME"
+
 const PUBLIC_ROUTES: Array<{ path: string, whenAuthenticatedAction: 'redirect' | 'next' }> = [
   { path: '/sign-in', whenAuthenticatedAction: 'redirect' }
 ]
 const PUBLIC_ROUTE_REDIRECT = '/sign-in'
 const PRIVATE_ROUTE_REDIRECT = '/'
-const AUTH_TOKEN_NAME = '__auth_token'
 
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname
