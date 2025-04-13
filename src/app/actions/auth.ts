@@ -30,9 +30,9 @@ export async function signIn(
   }
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       email: validatedFields.data.email,
@@ -42,10 +42,10 @@ export async function signIn(
 
   if (!response.ok) {
     return {
-      message: 'Credenciais inválidas. Por favor, tente novamente.',
+      message: "Credenciais inválidas. Por favor, tente novamente.",
       values: {
         email,
-        password: ''
+        password: ""
       }
     }
   }
@@ -58,11 +58,19 @@ export async function signIn(
 
   cookieStore.set(AUTH_TOKEN_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
     maxAge: ONE_HOUR
   })
 
   redirect("/")
+}
+
+export async function logout() {
+  const cookieStore = await cookies()
+  
+  cookieStore.delete(AUTH_TOKEN_NAME)
+
+  redirect('/sign-in')
 }
