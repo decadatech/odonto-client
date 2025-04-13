@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Loader2 } from 'lucide-react'
 
 import { signIn } from '@/app/actions/auth'
-import type { SignInFormState } from '@/app/lib/definitions/auth'
+import type { SignInFormState } from '@/lib/definitions/auth'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

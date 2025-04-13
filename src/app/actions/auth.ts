@@ -3,7 +3,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
-import { SignInFormSchema, type SignInFormState } from "../lib/definitions/auth"
+import { SignInFormSchema, type SignInFormState } from "@/lib/definitions/auth"
 
 import { AUTH_TOKEN_NAME } from "@/constants/AUTH_TOKEN_NAME"
 
