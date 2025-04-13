@@ -1,3 +1,5 @@
+"use client"
+
 import { Sidebar } from "../ui/sidebar";
 
 export function SidebarRoot({ ...props }: React.ComponentProps<typeof Sidebar>) {
