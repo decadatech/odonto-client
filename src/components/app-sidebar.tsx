@@ -10,26 +10,33 @@ import {
 } from "@/components/ui/sidebar";
 import { Sidebar } from "./sidebar";
 
-// This is sample data.
+import {
+  BriefcaseMedical,
+  CalendarDays,
+  Users
+} from "lucide-react"
+
 const data = {
   navMain: [
     {
       title: "Getting Started",
-      // url: "#",
       items: [
         {
           title: "Agenda",
           url: "#install",
+          icon: CalendarDays,
           isActive: true,
         },
         {
           title: "Pacientes",
           url: "#install",
+          icon: Users,
           isActive: false,
         },
         {
           title: "Dentistas",
           url: "#project",
+          icon: BriefcaseMedical,
           isActive: false,
         },
       ],
@@ -62,7 +69,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Roo
                   {item.items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={item.isActive}>
+                      <span className="flex items-center gap-2">
+                        {item.icon && <item.icon />}
                         <a href={item.url}>{item.title}</a>
+                        </span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
