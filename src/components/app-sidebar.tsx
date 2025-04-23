@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 
 import { Collapsible } from "@/components/ui/collapsible";
 import {
@@ -24,7 +25,7 @@ const data = {
         },
         {
           title: "Pacientes",
-          url: "#install",
+          url: "/patients",
           isActive: false,
         },
         {
@@ -62,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Roo
                   {item.items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={item.isActive}>
-                        <a href={item.url}>{item.title}</a>
+                        <Link href={item.url}>{item.title}</Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}

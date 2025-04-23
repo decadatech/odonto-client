@@ -17,7 +17,7 @@ export default function Layout({
           <div className="flex flex-col h-full">
             <Header />
 
-            <main className="flex-1 pt-4 overflow-auto">
+            <main className="flex-1 pt-8 overflow-auto">
               {children}
             </main>
           </div>
