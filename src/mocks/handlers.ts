@@ -4,6 +4,8 @@ export const handlers = [
   http.post<never, { email: string; password: string }>(
     `${process.env.NEXT_PUBLIC_API_URL}/login`,
     async ({ request }) => {
+      await delay(1000)
+
       const { email, password } = await request.json()
 
       // Mock successful login

@@ -95,6 +95,30 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
   )
 }
 
+
+type ActionCellProps = React.ComponentProps<"td"> & {
+  actions: React.ReactNode;
+}
+
+function TableActionCell({ actions, className, ...rest }: ActionCellProps) {
+  return (
+    <td
+      className={cn(`
+        bg-gradient-to-l group-odd/tablerow:from-white group-even/tablerow:from-muted to-transparent from-50% to-100% 
+        opacity-0 invisible group-hover/tablerow:opacity-100 group-hover/tablerow:visible
+        flex absolute justify-end items-center px-4 py-0 space-x-2 top-0 right-0 h-[calc(100%-1px)] w-[300px]
+        transition-all overflow-x-hidden`,
+        className,
+      )}
+      {...rest}
+    >
+      <div className="duration-200 ease-in-out transform translate-x-2 group-hover/tablerow:translate-x-0">
+        {actions}
+      </div>
+    </td>
+  );
+}
+
 function TableCaption({
   className,
   ...props
@@ -116,5 +140,6 @@ export {
   TableHead,
   TableRow,
   TableCell,
+  TableActionCell,
   TableCaption,
 }
