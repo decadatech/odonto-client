@@ -1,3 +1,5 @@
+"use client"
+
 import { Pencil, Eye, Trash } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -10,6 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCaption,
 } from "@/components/ui/table"
 
 import { formatCPF, formatPhoneNumber } from "@/lib/utils"
