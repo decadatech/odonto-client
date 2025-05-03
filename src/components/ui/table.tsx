@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { ArrowDown, ArrowUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -69,16 +70,58 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
   )
 }
 
-function TableHead({ className, ...props }: React.ComponentProps<"th">) {
+interface TableHeadProps extends React.ComponentProps<"th"> {
+  sortable?: boolean;
+  sortOrder?: "asc" | "desc";
+  onSort?: (order: 'asc' | 'desc') => void;
+}
+
+function TableHead({ className, children, sortable = false, sortOrder, onSort, tabIndex = 0, ...props }: TableHeadProps) {
+  const updatedSortOrder = (() => {
+    if (sortOrder === undefined) return 'desc';
+
+    return sortOrder === 'asc' ? 'desc' : 'asc';
+  })();
+
   return (
     <th
       data-slot="table-head"
       className={cn(
-        "p-4 text-foreground h-10 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        "p-4 text-foreground text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
       {...props}
-    />
+    >
+      <div 
+        className="group flex items-center justify-between data-[sortable=true]:cursor-pointer" data-sortable={sortable}
+        tabIndex={tabIndex}
+        role="button"
+        onClick={() => sortable && onSort?.(updatedSortOrder)}
+        onKeyDown={e => {
+          if (e.code === 'Enter' && sortable) {
+            onSort?.(updatedSortOrder);
+          }
+        }}
+      >
+        {children}
+
+        {sortable && (
+          <div
+            className="
+              w-6 h-6 flex justify-center items-center invisible data-[is-ordered=true]:visible
+              group-hover:visible group-hover:bg-colors-background-neutral-1 bg-muted/50 rounded-md
+            "
+            data-is-ordered={sortOrder !== undefined}
+          >
+            {sortOrder === 'asc' ? (
+              <ArrowUp className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ArrowDown className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+        )}
+      </div>
+    </th>
   )
 }
 

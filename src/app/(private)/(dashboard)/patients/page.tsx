@@ -1,18 +1,33 @@
 "use client"
 
+import { use, Suspense } from 'react'
 import Link from "next/link"
 import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { LoadingIndicator } from "@/components/loading-indicator"
 import { PatientsTable } from "./patients-table"
+import { SearchInput } from './search-input'
 
 import { useInfinitePatients } from "@/hooks/queries/patients"
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
 
-export default function Patients() {
-  const { data: patientsData, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useInfinitePatients()
+import type { Pagination } from '@/types/api'
+
+interface PatientsPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default function Patients({ searchParams }: PatientsPageProps) {
+  const { search, sort_order} = use(searchParams) as { search: string, sort_order: Pagination['sort_order'] }
+  
+  const { 
+    data: patientsData,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfinitePatients({ sort_order, search })
   const patients = patientsData?.pages.flatMap(page => page.data) ?? []
 
   const loadMoreRef = useInfiniteScroll(
@@ -42,7 +57,9 @@ export default function Patients() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6 gap-2">
-        <Input type="text" className="max-w-md" placeholder="Pesquisar por nome do paciente..." />
+        <Suspense>
+          <SearchInput />
+        </Suspense>
 
         <Button asChild>
           <Link href="/patients/new">
@@ -52,15 +69,18 @@ export default function Patients() {
         </Button>
       </div>
 
-      <PatientsTable
-        patients={patients}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onDetails={handleDetails}
-      />
+      <Suspense>
+        <PatientsTable
+          patients={patients}
+          isLoading={isFetching}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onDetails={handleDetails}
+        />
+      </Suspense>
 
-      <LoadingIndicator isLoading={isLoading || isFetchingNextPage} />
-      
+      <LoadingIndicator label="Carregando pacientes..." isLoading={isFetching} />
+
       <div ref={loadMoreRef} className="h-0 w-full" />
     </div>
   )

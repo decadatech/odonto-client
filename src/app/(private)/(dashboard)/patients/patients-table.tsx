@@ -1,5 +1,6 @@
 "use client"
 
+import { useSearchParams, useRouter } from "next/navigation"
 import { Pencil, Eye, Trash } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -22,6 +23,7 @@ import { type Patient } from "@/types/patient"
 
 interface PatientsTableProps {
   patients: Patient[]
+  isLoading: boolean
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onDetails: (id: string) => void
@@ -83,16 +85,32 @@ function TableActions({ onEdit, onDelete, onDetails }: TableActionsProps) {
 
 export function PatientsTable({
   patients,
+  isLoading,
   onEdit,
   onDelete,
   onDetails,
 }: PatientsTableProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams();
+
+  const handleSort = (value: 'asc' | 'desc') => {
+    const params = new URLSearchParams(searchParams)
+    if (value) {
+      params.set('sort_order', value)
+    } else {
+      params.delete('sort_order')
+    }
+    router.replace(`/patients?${params.toString()}`)
+  }
+
+  const sortOrder = (searchParams.get('sort_order') ?? 'asc') as 'asc' | 'desc';
+
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow className="border-b !border-b-border">
-            <TableHead className="w-1/4">Nome</TableHead>
+            <TableHead className="w-1/4" sortable sortOrder={sortOrder} onSort={handleSort}>Nome</TableHead>
             <TableHead>CPF</TableHead>
             <TableHead>Prontuário</TableHead>
             <TableHead>Telefone</TableHead>
@@ -100,7 +118,7 @@ export function PatientsTable({
           </TableRow>
         </TableHeader>
 
-        {patients.length === 0 && (
+        {patients.length === 0 && !isLoading && (
           <TableCaption>Nenhum paciente encontrado</TableCaption>
         )}
 
