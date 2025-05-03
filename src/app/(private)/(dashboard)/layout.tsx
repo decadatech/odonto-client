@@ -1,7 +1,7 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+"use client"
+
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +10,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { AppSidebar } from "@/components/app-sidebar"
+
+import { AppProvider } from "@/contexts";
 
 export default function Layout({
   children,
@@ -17,7 +20,7 @@ export default function Layout({
   children: React.ReactNode
 }>) {
   return (
-    <SidebarProvider>
+    <AppProvider>
       <AppSidebar />
 
       <SidebarInset>
@@ -28,13 +31,13 @@ export default function Layout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
+                  <BreadcrumbLink href="patients">
+                    Pacientes
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                  <BreadcrumbPage>Novo Paciente</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -43,6 +46,6 @@ export default function Layout({
 
         {children}
       </SidebarInset>
-    </SidebarProvider>
+    </AppProvider>
   )
 }
