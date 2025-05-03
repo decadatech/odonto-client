@@ -14,18 +14,11 @@ import {
   TableRow,
   TableCaption,
 } from "@/components/ui/table"
-
-import { formatCPF, formatPhoneNumber } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
-interface Patient {
-  id: string
-  name: string
-  cpf: string
-  phoneNumber: string
-  email: string
-  medicalRecord: string
-}
+import { formatCPF, formatPhoneNumber } from "@/lib/formatters"
+
+import { type Patient } from "@/types/patient"
 
 interface PatientsTableProps {
   patients: Patient[]
@@ -130,8 +123,8 @@ export function PatientsTable({
                 </div>
               </TableCell>
               <TableCell>{formatCPF(patient.cpf)}</TableCell>
-              <TableCell>{formatPhoneNumber(patient.phoneNumber)}</TableCell>
               <TableCell>{patient.medicalRecord}</TableCell>
+              <TableCell>{formatPhoneNumber(patient.phoneNumber)}</TableCell>
               <TableCell>{patient.email}</TableCell>
               <TableActionCell
                 actions={
