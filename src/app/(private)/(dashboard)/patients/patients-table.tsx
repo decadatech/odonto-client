@@ -107,6 +107,10 @@ export function PatientsTable({
           </TableRow>
         </TableHeader>
 
+        {patients.length === 0 && (
+          <TableCaption>Nenhum paciente encontrado</TableCaption>
+        )}
+
         <TableBody>
           {patients.map((patient) => (
             <TableRow key={patient.id}>
