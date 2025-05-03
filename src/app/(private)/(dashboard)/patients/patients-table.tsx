@@ -96,7 +96,7 @@ export function PatientsTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b !border-b-border">
-            <TableHead>Nome</TableHead>
+            <TableHead className="w-1/4">Nome</TableHead>
             <TableHead>CPF</TableHead>
             <TableHead>Prontuário</TableHead>
             <TableHead>Telefone</TableHead>
