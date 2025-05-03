@@ -20,6 +20,7 @@ interface Patient {
   name: string
   cpf: string
   phoneNumber: string
+  email: string
   medicalRecord: string
 }
 
@@ -95,10 +96,11 @@ export function PatientsTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b !border-b-border">
-            <TableHead className="w-[300px]">Nome</TableHead>
+            <TableHead>Nome</TableHead>
             <TableHead>CPF</TableHead>
             <TableHead>Prontuário</TableHead>
             <TableHead>Telefone</TableHead>
+            <TableHead>E-mail</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -108,7 +110,7 @@ export function PatientsTable({
               <TableCell className="font-medium">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary">
                       {patient.name
                         .split(" ")
                         .map((n) => n[0])
@@ -123,6 +125,7 @@ export function PatientsTable({
               <TableCell>{formatCPF(patient.cpf)}</TableCell>
               <TableCell>{formatPhoneNumber(patient.phoneNumber)}</TableCell>
               <TableCell>{patient.medicalRecord}</TableCell>
+              <TableCell>{patient.email}</TableCell>
               <TableActionCell
                 actions={
                   <TableActions
