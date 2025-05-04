@@ -19,7 +19,7 @@ interface PatientsPageProps {
 }
 
 export default function Patients({ searchParams }: PatientsPageProps) {
-  const { search, sort_order} = use(searchParams) as { search: string, sort_order: Pagination['sort_order'] }
+  const { search, sort_order } = use(searchParams) as { search: string, sort_order: Pagination['sort_order'] }
   
   const { 
     data: patientsData,
@@ -27,7 +27,7 @@ export default function Patients({ searchParams }: PatientsPageProps) {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useInfinitePatients({ sort_order, search })
+  } = useInfinitePatients({ sort_order: sort_order || 'asc', search })
   const patients = patientsData?.pages.flatMap(page => page.data) ?? []
 
   const loadMoreRef = useInfiniteScroll(

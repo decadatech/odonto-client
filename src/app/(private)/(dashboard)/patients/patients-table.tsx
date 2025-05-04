@@ -129,7 +129,7 @@ export function PatientsTable({
                 <div className="flex items-center gap-3">
                   <Avatar className="w-8 h-8">
                     <AvatarFallback className="bg-primary/10 text-primary">
-                      {patient.name
+                      {patient.nome
                         .split(" ")
                         .map((n) => n[0])
                         .join("")
@@ -137,12 +137,12 @@ export function PatientsTable({
                         .slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
-                  <span>{patient.name}</span>
+                  <span>{patient.nome}</span>
                 </div>
               </TableCell>
               <TableCell>{formatCPF(patient.cpf)}</TableCell>
-              <TableCell>{patient.medicalRecord}</TableCell>
-              <TableCell>{formatPhoneNumber(patient.phoneNumber)}</TableCell>
+              <TableCell>{patient.prontuario}</TableCell>
+              <TableCell>{formatPhoneNumber(patient.telefone)}</TableCell>
               <TableCell>{patient.email}</TableCell>
               <TableActionCell
                 actions={
