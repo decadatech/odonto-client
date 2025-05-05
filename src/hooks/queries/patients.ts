@@ -19,7 +19,7 @@ export function useInfinitePatients({ sort_order, search }: UseInfinitePatientsO
           search,
           page: Number(pageParam) || 1,
           sort_order: sort_order,
-          sort_by: 'name',
+          sort_by: 'nome',
         }
       });
       return response.data;
@@ -34,6 +34,9 @@ export function useInfinitePatients({ sort_order, search }: UseInfinitePatientsO
       const { pagination } = firstPage;
       const hasPreviousPage = pagination.page > 1;
       return hasPreviousPage ? pagination.page - 1 : undefined;
+    },
+    placeholderData: (data) => {
+      return data;
     }
   });
 }
