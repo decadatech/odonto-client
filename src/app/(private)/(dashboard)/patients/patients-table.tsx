@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
-import { formatCPF, formatPhoneNumber } from "@/lib/formatters"
+import { formatRG, formatPhoneNumber } from "@/lib/formatters"
 
 import { type Patient } from "@/types/patient"
 
@@ -139,7 +139,7 @@ export function PatientsTable({
                   <span>{patient.nome}</span>
                 </div>
               </TableCell>
-              <TableCell>{formatCPF(patient.rg)}</TableCell>
+              <TableCell>{formatRG(patient.rg)}</TableCell>
               <TableCell>{formatPhoneNumber(patient.telefone)}</TableCell>
               <TableCell>{patient.email}</TableCell>
               <TableActionCell
