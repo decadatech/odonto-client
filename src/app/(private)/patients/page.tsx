@@ -1,6 +1,6 @@
 "use client"
 
-import { use, Suspense } from 'react'
+import { use, Suspense, useEffect } from 'react'
 import Link from "next/link"
 import { Plus } from "lucide-react"
 
@@ -11,6 +11,7 @@ import { SearchInput } from './search-input'
 
 import { useInfinitePatients } from "@/hooks/queries/patients"
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
+import { useBreadcrumbs } from '@/hooks/use-breadcrumbs'
 
 import type { Pagination } from '@/types/api'
 
@@ -18,10 +19,11 @@ interface PatientsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function Patients({ searchParams }: PatientsPageProps) {
+export default function Patients({ searchParams }: PatientsPageProps) {  
   const { search, sort_order } = use(searchParams) as { search: string, sort_order: Pagination['sort_order'] }
-  
-  const { 
+  const { setBreadcrumbs } = useBreadcrumbs();
+
+  const {
     data: patientsData,
     isFetching,
     hasNextPage,
@@ -38,6 +40,17 @@ export default function Patients({ searchParams }: PatientsPageProps) {
     },
     hasNextPage && !isFetchingNextPage
   )
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: "Página inicial", href: "/" },
+      { label: "Pacientes", href: "/patients" },
+    ]);
+    
+    return () => {
+      setBreadcrumbs([])
+    }
+  }, [setBreadcrumbs]);
 
   const handleEdit = (id: string) => {
     // TODO
