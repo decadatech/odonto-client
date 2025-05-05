@@ -4,9 +4,8 @@ import { faker } from '@faker-js/faker'
 const MOCK_PATIENTS = Array.from({ length: 75 }, () => ({
   id: faker.string.uuid(),
   nome: faker.person.fullName(),
-  cpf: faker.string.numeric(11),
+  rg: faker.string.numeric(9),
   telefone: `11${faker.string.numeric(9)}`,
-  prontuario: faker.string.numeric(11),
   email: faker.internet.email(),
 }))
 
@@ -34,7 +33,7 @@ export const handlers = [
   ),
 
   // TODO: simulate api errors
-  http.get(`${process.env.NEXT_PUBLIC_API_URL}/patients`, async ({ request }) => {
+  http.get(`${process.env.NEXT_PUBLIC_API_URL}/pacientes`, async ({ request }) => {
     await delay(1000)
 
     const url = new URL(request.url)

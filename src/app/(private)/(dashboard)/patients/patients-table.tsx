@@ -111,8 +111,7 @@ export function PatientsTable({
         <TableHeader>
           <TableRow className="border-b !border-b-border">
             <TableHead className="w-1/4" sortable sortOrder={sortOrder} onSort={handleSort}>Nome</TableHead>
-            <TableHead>CPF</TableHead>
-            <TableHead>Prontuário</TableHead>
+            <TableHead>RG</TableHead>
             <TableHead>Telefone</TableHead>
             <TableHead>E-mail</TableHead>
           </TableRow>
@@ -140,8 +139,7 @@ export function PatientsTable({
                   <span>{patient.nome}</span>
                 </div>
               </TableCell>
-              <TableCell>{formatCPF(patient.cpf)}</TableCell>
-              <TableCell>{patient.prontuario}</TableCell>
+              <TableCell>{formatCPF(patient.rg)}</TableCell>
               <TableCell>{formatPhoneNumber(patient.telefone)}</TableCell>
               <TableCell>{patient.email}</TableCell>
               <TableActionCell
