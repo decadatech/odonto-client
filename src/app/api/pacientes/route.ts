@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       sort_by: sortBy,
     })
 
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/patients?${params}`
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/pacientes?${params}`
 
     const response = await fetch(url, {
       method: "GET",

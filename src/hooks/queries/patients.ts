@@ -14,7 +14,7 @@ export function useInfinitePatients({ sort_order, search }: UseInfinitePatientsO
   return useInfiniteQuery<PaginatedResponse<Patient>>({
     queryKey: ["patients", { search, sort_order }],
     queryFn: async ({ pageParam }) => {
-      const response = await api.get("/patients", {
+      const response = await api.get("/pacientes", {
         params: {
           search,
           page: Number(pageParam) || 1,
