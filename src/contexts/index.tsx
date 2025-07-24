@@ -1,7 +1,10 @@
+"use client"
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { BreadcrumbsProvider } from "./breadcrumbs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -14,9 +17,11 @@ const queryClient = new QueryClient({
 export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <SidebarProvider>
-        {children}
-      </SidebarProvider>
+      <BreadcrumbsProvider>
+        <SidebarProvider>
+          {children}
+        </SidebarProvider>
+      </BreadcrumbsProvider>
 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

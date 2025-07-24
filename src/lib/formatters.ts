@@ -3,6 +3,11 @@ export function formatCPF(cpf: string): string {
   return cleanCPF.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
 }
 
+export function formatRG(rg: string): string {
+  const cleanRG = rg.replace(/\D/g, "")
+  return cleanRG.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4")
+}
+
 export function formatPhoneNumber(phone: string): string {
   const cleanPhone = phone.replace(/\D/g, "")
   if (cleanPhone.length === 11) {
