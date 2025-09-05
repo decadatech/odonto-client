@@ -8,3 +8,5 @@ node_modules
 public/mockServiceWorker.js
 
 .turbo
+
+.DS_Store
