@@ -1,5 +1,8 @@
+"use client"
+
 import * as React from "react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 import { Collapsible } from "@workspace/ui/components/collapsible";
 import {
@@ -45,13 +48,12 @@ const data = {
   ],
 };
 
-const USER = {
-  name: "Gabriel Gigante",
-  email: "gigante@example.com",
-  avatar: "https://avatars.githubusercontent.com/u/48386738?v=4",
-};
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Root>) {
+  const { user } = useUser()
+
+  const userName = user?.fullName ?? user?.firstName ?? 'Usuário'
+  const userEmail = user?.primaryEmailAddress?.emailAddress ?? ''
+
   return (
     <Sidebar.Root {...props}>
       <Sidebar.Header title="Nome da clínica" />
@@ -84,7 +86,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Roo
         ))}
       </Sidebar.Content>
 
-      <Sidebar.Footer user={USER} />
+      <Sidebar.Footer
+        user={{
+          name: userName,
+          email: userEmail,
+        }}
+      />
     </Sidebar.Root>
   );
 }

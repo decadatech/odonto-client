@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { ClerkProvider, SignedIn, UserButton } from '@clerk/nextjs'
 
 import { server } from '@/mocks/server'
 
@@ -32,11 +33,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
-        <Toaster />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable}`}>
+          <header className="fixed right-4 top-4 z-50 flex items-center gap-2">
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </header>
+          {children}
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

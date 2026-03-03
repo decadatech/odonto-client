@@ -1,15 +1,11 @@
 "use client"
 
-import { useTransition } from 'react'
+import { UserButton } from "@clerk/nextjs"
 import {
   ChevronsUpDown,
   CreditCard,
-  Loader2,
-  LogOut,
   Settings,
 } from "lucide-react"
-
-import { logout } from '@/app/actions/auth'
 
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import {
@@ -36,10 +32,8 @@ export function SidebarFooter({
   user: {
     name: string
     email: string
-    avatar: string
   }
 }) {
-  const [isPending, startTransition] = useTransition()
   const { isMobile } = useSidebar()
 
   return (
@@ -99,13 +93,8 @@ export function SidebarFooter({
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem
-                  onClick={() => startTransition(logout)}
-                  disabled={isPending}
-                >
-                  <LogOut />
-                  Sair
-                  {isPending && <Loader2 className="ml-auto h-4 w-4 animate-spin" />}
+                <DropdownMenuItem className="cursor-default focus:bg-transparent">
+                  <UserButton />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
