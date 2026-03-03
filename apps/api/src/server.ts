@@ -1,6 +1,7 @@
-import { env } from "./env"
+import "dotenv/config"
 
 import { buildApp } from "./app"
+import { env } from "./env"
 
 async function start() {
   const app = buildApp()
