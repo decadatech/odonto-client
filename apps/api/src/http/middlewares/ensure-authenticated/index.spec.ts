@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { verifyToken } from "@clerk/backend"
-
 import { ensureAuthenticated } from "."
 
 vi.mock("@clerk/backend", () => ({
@@ -59,7 +58,7 @@ describe("ensureAuthenticated middleware", () => {
   })
 
   it("should return 401 when authorization header is invalid", async () => {
-    const request = createRequestMock("Basic token")
+    const request = createRequestMock("Basic invalid-token")
     const reply = createReplyMock()
 
     await ensureAuthenticated(request, reply)
@@ -70,11 +69,25 @@ describe("ensureAuthenticated middleware", () => {
     })
   })
 
-  it("should return 401 when token verification fails", async () => {
+  it("should return 401 when token verification throws", async () => {
+    const request = createRequestMock("Bearer valid-token")
+    const reply = createReplyMock()
     vi.mocked(verifyToken).mockRejectedValueOnce(new Error("invalid token"))
 
-    const request = createRequestMock("Bearer invalid-token")
+    await ensureAuthenticated(request, reply)
+
+    expect(reply.status).toHaveBeenCalledWith(401)
+    expect(reply.send).toHaveBeenCalledWith({
+      message: "Invalid authentication token",
+    })
+  })
+
+  it("should return 401 when payload has no userId or orgId", async () => {
+    const request = createRequestMock("Bearer valid-token")
     const reply = createReplyMock()
+    vi.mocked(verifyToken).mockResolvedValueOnce({
+      userId: "user_123",
+    } as never)
 
     await ensureAuthenticated(request, reply)
 
@@ -84,30 +97,13 @@ describe("ensureAuthenticated middleware", () => {
     })
   })
 
-  it("should return 401 when token has no org_id", async () => {
-    vi.mocked(verifyToken).mockResolvedValueOnce({
-      sub: "user_123",
-    } as never)
-
+  it("should set userId and orgId in request context when payload is valid", async () => {
     const request = createRequestMock("Bearer valid-token")
     const reply = createReplyMock()
-
-    await ensureAuthenticated(request, reply)
-
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({
-      message: "Invalid authentication token",
-    })
-  })
-
-  it("should set userId and orgId in request context when token is valid", async () => {
     vi.mocked(verifyToken).mockResolvedValueOnce({
-      sub: "user_123",
-      org_id: "org_123",
+      userId: "user_123",
+      orgId: "org_123",
     } as never)
-
-    const request = createRequestMock("Bearer valid-token")
-    const reply = createReplyMock()
 
     await ensureAuthenticated(request, reply)
 

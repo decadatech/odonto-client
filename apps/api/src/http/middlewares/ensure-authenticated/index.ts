@@ -24,8 +24,7 @@ export async function ensureAuthenticated(
       secretKey: env.CLERK_SECRET_KEY,
     })
 
-    const userId = payload.sub
-    const orgId = (payload as { org_id?: string }).org_id
+    const { userId, orgId } = payload as { userId?: string, orgId?: string }
 
     if (!userId || !orgId) {
       return reply.status(401).send({ message: "Invalid authentication token" })
