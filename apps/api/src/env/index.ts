@@ -7,6 +7,7 @@ const envSchema = z.object({
   DATABASE_NAME: z.string().min(1),
   DATABASE_USER: z.string().min(1),
   DATABASE_PASSWORD: z.string().min(1),
+  CLERK_SECRET_KEY: z.string().min(1),
 })
 
 const _env = envSchema.safeParse(process.env)

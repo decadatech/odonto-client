@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1772570908567,
+      "tag": "0000_chubby_boomerang",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772669052484,
+      "tag": "0001_previous_spyke",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772669274179,
+      "tag": "0002_lyrical_clint_barton",
+      "breakpoints": true
+    }
+  ]
+}

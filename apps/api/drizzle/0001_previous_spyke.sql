@@ -1,0 +1,1 @@
+DROP INDEX "patients_org_name_idx";
