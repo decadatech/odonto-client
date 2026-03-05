@@ -45,56 +45,56 @@ describe("ensureAuthenticated middleware", () => {
     vi.clearAllMocks()
   })
 
-  it("should return 401 when authorization header is missing", async () => {
+  it("should throw 401 when authorization header is missing", async () => {
     const request = createRequestMock()
     const reply = createReplyMock()
 
-    await ensureAuthenticated(request, reply)
-
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({
-      message: "Missing authorization header",
-    })
+    await expect(ensureAuthenticated(request, reply)).rejects.toEqual(
+      expect.objectContaining({
+        status: 401,
+        code: "MISSING_AUTHORIZATION_HEADER",
+      }),
+    )
   })
 
-  it("should return 401 when authorization header is invalid", async () => {
+  it("should throw 401 when authorization header is invalid", async () => {
     const request = createRequestMock("Basic invalid-token")
     const reply = createReplyMock()
 
-    await ensureAuthenticated(request, reply)
-
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({
-      message: "Invalid authorization header",
-    })
+    await expect(ensureAuthenticated(request, reply)).rejects.toEqual(
+      expect.objectContaining({
+        status: 401,
+        code: "INVALID_AUTHORIZATION_HEADER",
+      }),
+    )
   })
 
-  it("should return 401 when token verification throws", async () => {
+  it("should throw 401 when token verification throws", async () => {
     const request = createRequestMock("Bearer valid-token")
     const reply = createReplyMock()
     vi.mocked(verifyToken).mockRejectedValueOnce(new Error("invalid token"))
 
-    await ensureAuthenticated(request, reply)
-
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({
-      message: "Invalid authentication token",
-    })
+    await expect(ensureAuthenticated(request, reply)).rejects.toEqual(
+      expect.objectContaining({
+        status: 401,
+        code: "INVALID_AUTHENTICATION_TOKEN",
+      }),
+    )
   })
 
-  it("should return 401 when payload has no userId or orgId", async () => {
+  it("should throw 401 when payload has no userId or orgId", async () => {
     const request = createRequestMock("Bearer valid-token")
     const reply = createReplyMock()
     vi.mocked(verifyToken).mockResolvedValueOnce({
       userId: "user_123",
     } as never)
 
-    await ensureAuthenticated(request, reply)
-
-    expect(reply.status).toHaveBeenCalledWith(401)
-    expect(reply.send).toHaveBeenCalledWith({
-      message: "Invalid authentication token",
-    })
+    await expect(ensureAuthenticated(request, reply)).rejects.toEqual(
+      expect.objectContaining({
+        status: 401,
+        code: "INVALID_AUTHENTICATION_TOKEN",
+      }),
+    )
   })
 
   it("should set userId and orgId in request context when payload is valid", async () => {
