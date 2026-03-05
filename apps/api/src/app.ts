@@ -8,6 +8,7 @@ import {
 
 import { healthCheckRoutes } from "./http/routes/health-check-routes"
 import { patientsRoutes } from "./http/routes/patients-routes"
+import { registerGlobalErrorHandler } from "./http/errors/error-handler"
 
 export function buildApp() {
   const app = Fastify().withTypeProvider<ZodTypeProvider>()
@@ -16,6 +17,8 @@ export function buildApp() {
   app.setSerializerCompiler(serializerCompiler)
 
   app.register(fastifyRequestContext)
+  
+  registerGlobalErrorHandler(app)
 
   app.register(healthCheckRoutes)
 
