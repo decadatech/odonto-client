@@ -21,6 +21,7 @@ export function buildApp() {
   registerGlobalErrorHandler(app)
 
   app.register(healthCheckRoutes)
+  app.register(patientsRoutes)
 
   return app
 }

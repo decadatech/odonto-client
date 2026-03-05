@@ -1,9 +1,10 @@
 import { and, eq } from "drizzle-orm"
+import { z } from "zod"
 
 import { db } from "../../db"
 import { patients } from "../../db/schema"
 import { AppError } from "../../http/errors/app-error"
-import type { CreatePatientResponse } from "../../schemas/patients"
+import { createPatientResponseSchema } from "../../schemas/patients"
 
 type PatientSex = "male" | "female" | "other"
 
@@ -24,7 +25,7 @@ export type CreatePatientUseCaseInput = {
   state: string
 }
 
-export type CreatePatientUseCaseOutput = CreatePatientResponse
+export type CreatePatientUseCaseOutput = z.infer<typeof createPatientResponseSchema>
 
 export async function createPatientUseCase(
   input: CreatePatientUseCaseInput,
@@ -82,7 +83,7 @@ export async function createPatientUseCase(
   return toPatientOutput(patient!)
 }
 
-function toPatientOutput(patient: typeof patients.$inferSelect): CreatePatientResponse {
+function toPatientOutput(patient: typeof patients.$inferSelect): CreatePatientUseCaseOutput {
   return {
     ...patient,
     createdAt: patient.createdAt.toISOString(),
