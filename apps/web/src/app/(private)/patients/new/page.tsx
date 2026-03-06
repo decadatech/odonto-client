@@ -22,6 +22,13 @@ import { BirthDatePicker } from "@/components/birth-date-picker"
 import { formatCPF, formatPhoneNumber, formatRG } from "@/utils/formatters"
 import { BRAZILIAN_STATES } from "@/constants/brasilian-states"
 
+const CREATE_PATIENT_ERROR_MESSAGES: Record<string, string> = {
+  PATIENT_CPF_ALREADY_EXISTS: "Já existe um paciente com este CPF.",
+  PATIENT_RG_ALREADY_EXISTS: "Já existe um paciente com este RG.",
+}
+
+const DEFAULT_CREATE_PATIENT_ERROR_MESSAGE = "Algo deu errado ao tentar criar o paciente. Tente novamente."
+
 export default function NewPatientPage() {
   const { setBreadcrumbs } = useBreadcrumbs()
   const [state, action, pending] = useActionState(createPatientAction, {})
@@ -38,6 +45,13 @@ export default function NewPatientPage() {
     }
   }, [setBreadcrumbs])
 
+
+  useEffect(() => {
+    if (state?.code) {
+      toast.error(CREATE_PATIENT_ERROR_MESSAGES[state.code] ?? DEFAULT_CREATE_PATIENT_ERROR_MESSAGE)
+    }
+  }, [state?.code])
+
   return (
     <div className="p-6">
       <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground">Cadastrar novo paciente</h1>
@@ -48,7 +62,7 @@ export default function NewPatientPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <Label htmlFor="name" className="mb-2 inline-block text-muted-foreground">Nome</Label>
-              <Input id="name" name="name" required />
+              <Input id="name" name="name" maxLength={240} required />
             </div>
 
             <div>
@@ -133,7 +147,7 @@ export default function NewPatientPage() {
                 <Label htmlFor="email" className="inline-block text-muted-foreground">E-mail</Label>
                 <Badge variant="secondary" className="h-4 text-[10px] px-0.5 text-muted-foreground">Opcional</Badge>
               </div>
-              <Input id="email" name="email" type="email" />
+              <Input id="email" name="email" type="email" maxLength={240} />
             </div>
           </div>
         </section>
@@ -143,12 +157,12 @@ export default function NewPatientPage() {
           <div className="grid gap-4 md:grid-cols-7">
             <div className="md:col-span-2">
               <Label htmlFor="zipCode" className="mb-2 inline-block text-muted-foreground">CEP</Label>
-              <Input id="zipCode" name="zipCode" maxLength={20} required />
+              <Input id="zipCode" name="zipCode" maxLength={25} required />
             </div>
 
             <div className="md:col-span-5">
               <Label htmlFor="street" className="mb-2 inline-block text-muted-foreground">Logradouro</Label>
-              <Input id="street" name="street" required />
+              <Input id="street" name="street" maxLength={240} required />
             </div>
 
             <div className="md:col-span-2">
@@ -166,7 +180,7 @@ export default function NewPatientPage() {
 
             <div className="md:col-span-2">
               <Label htmlFor="neighborhood" className="mb-2 inline-block text-muted-foreground">Bairro</Label>
-              <Input id="neighborhood" name="neighborhood" required />
+              <Input id="neighborhood" name="neighborhood" maxLength={240} required />
             </div>
 
             <div className="md:col-span-1">
@@ -187,7 +201,7 @@ export default function NewPatientPage() {
 
             <div className="md:col-span-2">
               <Label htmlFor="city" className="mb-2 inline-block text-muted-foreground">Cidade</Label>
-              <Input id="city" name="city" required />
+              <Input id="city" name="city" maxLength={240} required />
             </div>
           </div>
         </section>
