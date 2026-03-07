@@ -35,3 +35,9 @@ export const createPatientResponseSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 })
+
+export const updatePatientParamsSchema = z.object({
+  patient_id: z.uuid(),
+})
+
+export const updatePatientBodySchema = createPatientBodySchema
