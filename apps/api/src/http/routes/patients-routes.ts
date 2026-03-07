@@ -5,10 +5,32 @@ import { ensureAuthenticated } from "../middlewares/ensure-authenticated"
 import {
   createPatientBodySchema,
   createPatientResponseSchema,
+  getPatientByIdParamsSchema,
+  getPatientByIdResponseSchema,
+  getPatientByTaxIdParamsSchema,
+  getPatientByTaxIdResponseSchema,
+  listPatientsResponseSchema,
+  updatePatientBodySchema,
+  updatePatientParamsSchema,
+  updatePatientResponseSchema,
 } from "../../schemas/patients"
 
 export const patientsRoutes: FastifyPluginAsyncZod = async (app) => {
   const patientController = new PatientController()
+
+  app.get(
+    "/patients/:patient_id",
+    {
+      preHandler: [ensureAuthenticated],
+      schema: {
+        params: getPatientByIdParamsSchema,
+        response: {
+          200: getPatientByIdResponseSchema,
+        },
+      },
+    },
+    patientController.getById.bind(patientController),
+  )
 
   app.post(
     "/patients",
@@ -22,5 +44,20 @@ export const patientsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     patientController.create.bind(patientController),
+  )
+
+  app.put(
+    "/patients/:patient_id",
+    {
+      preHandler: [ensureAuthenticated],
+      schema: {
+        params: updatePatientParamsSchema,
+        body: updatePatientBodySchema,
+        response: {
+          200: updatePatientResponseSchema,
+        },
+      },
+    },
+    patientController.update.bind(patientController),
   )
 }

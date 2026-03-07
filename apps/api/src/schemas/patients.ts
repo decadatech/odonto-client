@@ -1,22 +1,6 @@
 import { z } from "zod"
 
-export const createPatientBodySchema = z.object({
-  name: z.string().min(1).trim(),
-  sex: z.enum(["male", "female", "other"]),
-  birthDate: z.string().date().trim(),
-  rg: z.string().min(1).trim(),
-  cpf: z.string().min(11).trim(),
-  phone: z.string().min(8).trim(),
-  email: z.string().trim().toLowerCase().email().optional().nullable(),
-  zipCode: z.string().min(8).trim(),
-  street: z.string().min(1).trim(),
-  streetNumber: z.string().min(1).trim(),
-  neighborhood: z.string().min(1).trim(),
-  city: z.string().min(1).trim(),
-  state: z.string().trim().toUpperCase(),
-})
-
-export const createPatientResponseSchema = z.object({
+const getPatientResponseSchema = z.object({
   id: z.uuid(),
   orgId: z.string().min(1),
   name: z.string().min(1),
@@ -36,8 +20,34 @@ export const createPatientResponseSchema = z.object({
   updatedAt: z.iso.datetime(),
 })
 
+export const getPatientByIdParamsSchema = z.object({
+  patient_id: z.uuid(),
+})
+
+export const getPatientByIdResponseSchema = getPatientResponseSchema
+
+export const createPatientBodySchema = z.object({
+  name: z.string().min(1).trim(),
+  sex: z.enum(["male", "female", "other"]),
+  birthDate: z.string().date().trim(),
+  rg: z.string().min(1).trim(),
+  cpf: z.string().min(11).trim(),
+  phone: z.string().min(8).trim(),
+  email: z.string().trim().toLowerCase().email().optional().nullable(),
+  zipCode: z.string().min(8).trim(),
+  street: z.string().min(1).trim(),
+  streetNumber: z.string().min(1).trim(),
+  neighborhood: z.string().min(1).trim(),
+  city: z.string().min(1).trim(),
+  state: z.string().trim().toUpperCase(),
+})
+
+export const createPatientResponseSchema = getPatientResponseSchema
+
 export const updatePatientParamsSchema = z.object({
   patient_id: z.uuid(),
 })
 
 export const updatePatientBodySchema = createPatientBodySchema
+
+export const updatePatientResponseSchema = getPatientResponseSchema
