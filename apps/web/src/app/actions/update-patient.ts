@@ -7,7 +7,7 @@ import { auth } from "@clerk/nextjs/server"
 import { backendErrorSchema } from "@/schemas/api"
 import { patientPayloadSchema } from "@/schemas/patients"
 
-type CreatePatientFormState = {
+type UpdatePatientFormState = {
   code?: string
 }
 
@@ -15,10 +15,11 @@ function onlyDigits(value: string) {
   return value.replace(/\D/g, "")
 }
 
-export async function createPatientAction(
-  _state: CreatePatientFormState,
+export async function updatePatientAction(
+  patientId: string,
+  _state: UpdatePatientFormState,
   formData: FormData,
-): Promise<CreatePatientFormState> {
+): Promise<UpdatePatientFormState> {
   const { getToken } = await auth()
   const token = await getToken()
 
@@ -50,8 +51,8 @@ export async function createPatientAction(
     }
   }
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients`, {
-    method: "POST",
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients/${patientId}`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -70,7 +71,7 @@ export async function createPatientAction(
     }
 
     return {
-      code: "CREATE_PATIENT_FAILED",
+      code: "UPDATE_PATIENT_FAILED",
     }
   }
 
