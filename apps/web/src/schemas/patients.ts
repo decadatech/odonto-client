@@ -9,7 +9,7 @@ export const patientPayloadSchema = z.object({
   cpf: z.string().min(11).trim(),
   phone: z.string().min(8).trim(),
   email: z.string().trim().toLowerCase().email().optional().nullable(),
-  zipCode: z.string().min(8).trim(),
+  zipCode: z.string().min(1).trim(),
   street: z.string().min(1).trim(),
   streetNumber: z.string().min(1).trim(),
   neighborhood: z.string().min(1).trim(),

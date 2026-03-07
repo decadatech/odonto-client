@@ -17,17 +17,36 @@ import { cn } from "@workspace/ui/lib/utils"
 type BirthDatePickerProps = {
   id: string
   name: string
+  value?: string
+  onValueChange?: (value: string) => void
   required?: boolean
 }
 
 export function BirthDatePicker({
   id,
   name,
+  value,
+  onValueChange,
   required,
 }: BirthDatePickerProps) {
-  const [date, setDate] = React.useState<Date>()
+  const [date, setDate] = React.useState<Date | undefined>(() => {
+    if (!value) return undefined
+
+    const parsed = new Date(`${value}T00:00:00`)
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed
+  })
   const currentYear = new Date().getFullYear()
-  const value = date ? format(date, "yyyy-MM-dd") : ""
+  const hiddenValue = date ? format(date, "yyyy-MM-dd") : ""
+
+  React.useEffect(() => {
+    if (!value) {
+      setDate(undefined)
+      return
+    }
+
+    const parsed = new Date(`${value}T00:00:00`)
+    setDate(Number.isNaN(parsed.getTime()) ? undefined : parsed)
+  }, [value])
 
   return (
     <>
@@ -50,7 +69,10 @@ export function BirthDatePicker({
           <Calendar
             mode="single"
             selected={date}
-            onSelect={setDate}
+            onSelect={(selectedDate) => {
+              setDate(selectedDate)
+              onValueChange?.(selectedDate ? format(selectedDate, "yyyy-MM-dd") : "")
+            }}
             locale={ptBR}
             captionLayout="dropdown"
             fromYear={1900}
@@ -61,7 +83,7 @@ export function BirthDatePicker({
         </PopoverContent>
       </Popover>
 
-      <input id={id} name={name} type="hidden" value={value} required={required} />
+      <input id={id} name={name} type="hidden" value={hiddenValue} required={required} />
     </>
   )
 }
