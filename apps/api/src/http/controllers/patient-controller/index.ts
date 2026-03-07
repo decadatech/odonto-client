@@ -1,9 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify"
 
+import { getPatientByIdUseCase } from "../../../use-cases/get-patient-by-id-use-case"
 import { createPatientUseCase } from "../../../use-cases/create-patient-use-case/index"
 import { updatePatientUseCase } from "../../../use-cases/update-patient-use-case/index"
 import {
   createPatientBodySchema,
+  getPatientByIdParamsSchema,
   updatePatientBodySchema,
   updatePatientParamsSchema,
 } from "../../../schemas/patients"
@@ -14,6 +16,26 @@ function onlyDigits(value: string) {
 }
 
 export class PatientController {
+  async getById(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const orgId = request.requestContext.get("orgId")
+
+    if (!orgId) {
+      throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
+    }
+
+    const params = getPatientByIdParamsSchema.parse(request.params)
+
+    const patient = await getPatientByIdUseCase({
+      orgId,
+      patientId: params.patient_id,
+    })
+
+    return reply.status(200).send(patient)
+  }
+
   async create(
     request: FastifyRequest,
     reply: FastifyReply,
