@@ -12,6 +12,26 @@ import {
   varchar,
 } from "drizzle-orm/pg-core"
 
+export const userRoleEnum = pgEnum("user_role", ["secretary", "dentist"])
+
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    clerkId: text("clerk_id").notNull(),
+    orgId: text("org_id").notNull(),
+    role: userRoleEnum("role").notNull(),
+    cro: varchar("cro", { length: 20 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("users_org_clerk_id_unique").on(table.orgId, table.clerkId),
+    index("users_org_id_idx").on(table.orgId),
+    index("users_clerk_id_idx").on(table.clerkId),
+  ],
+)
+
 export const patientSexEnum = pgEnum("patient_sex", ["male", "female", "other"])
 
 export const patients = pgTable(

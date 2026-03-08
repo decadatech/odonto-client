@@ -1,0 +1,55 @@
+import type { FastifyReply, FastifyRequest } from "fastify"
+
+import { createUserUseCase } from "../../../use-cases/create-user-use-case/index"
+import { getUserByExternalIdUseCase } from "../../../use-cases/get-user-by-external-id-use-case/index"
+import { createUserBodySchema, getUserByExternalIdParamsSchema } from "../../../schemas/users"
+import { AppError } from "../../errors/app-error"
+
+export class UsersController {
+  async getByExternalId(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const orgId = request.requestContext.get("orgId")
+
+    if (!orgId) {
+      throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
+    }
+
+    const params = getUserByExternalIdParamsSchema.parse(request.params)
+
+    const user = await getUserByExternalIdUseCase({
+      orgId,
+      clerkId: params.user_id,
+    })
+
+    if (!user) {
+      throw new AppError(404, "USER_NOT_FOUND", "User not found")
+    }
+
+    return reply.status(200).send(user)
+  }
+
+  async create(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const orgId = request.requestContext.get("orgId")
+    const userId = request.requestContext.get("userId")
+
+    if (!orgId || !userId) {
+      throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
+    }
+
+    const body = createUserBodySchema.parse(request.body)
+
+    const user = await createUserUseCase({
+      orgId,
+      clerkId: userId,
+      role: body.role,
+      cro: body.cro,
+    })
+
+    return reply.status(201).send(user)
+  }
+}

@@ -3,13 +3,11 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import { PatientController } from "../controllers/patient-controller/index"
 import { ensureAuthenticated } from "../middlewares/ensure-authenticated"
 import {
-  createPatientBodySchema,
-  createPatientResponseSchema,
+  listPatientsResponseSchema,
   getPatientByIdParamsSchema,
   getPatientByIdResponseSchema,
-  getPatientByTaxIdParamsSchema,
-  getPatientByTaxIdResponseSchema,
-  listPatientsResponseSchema,
+  createPatientBodySchema,
+  createPatientResponseSchema,
   updatePatientBodySchema,
   updatePatientParamsSchema,
   updatePatientResponseSchema,
