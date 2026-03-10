@@ -6,13 +6,10 @@ import { auth } from "@clerk/nextjs/server"
 
 import { backendErrorSchema } from "@/schemas/api"
 import { patientPayloadSchema } from "@/schemas/patients"
+import { onlyDigits } from "@/utils/parsers"
 
 type CreatePatientFormState = {
   code?: string
-}
-
-function onlyDigits(value: string) {
-  return value.replace(/\D/g, "")
 }
 
 export async function createPatientAction(
