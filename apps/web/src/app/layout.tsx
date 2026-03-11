@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { ClerkProvider, SignedIn, UserButton } from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs'
 
 import { Toaster } from '@workspace/ui/components/sonner'
 
@@ -28,13 +28,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="pt-BR">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
-          <header className="fixed right-4 top-4 z-50 flex items-center gap-2">
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
           {children}
           <Toaster />
         </body>
