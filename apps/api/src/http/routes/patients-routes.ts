@@ -17,6 +17,19 @@ export const patientsRoutes: FastifyPluginAsyncZod = async (app) => {
   const patientController = new PatientController()
 
   app.get(
+    "/patients",
+    {
+      preHandler: [ensureAuthenticated],
+      schema: {
+        response: {
+          200: listPatientsResponseSchema,
+        },
+      },
+    },
+    patientController.list.bind(patientController),
+  )
+
+  app.get(
     "/patients/:patient_id",
     {
       preHandler: [ensureAuthenticated],

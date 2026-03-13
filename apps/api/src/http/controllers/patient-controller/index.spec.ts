@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { createPatientUseCase } from "../../../use-cases/create-patient-use-case/index"
 import { getPatientByIdUseCase } from "../../../use-cases/get-patient-by-id-use-case"
+import { listPatientsUseCase } from "../../../use-cases/list-patients-use-case"
 import { updatePatientUseCase } from "../../../use-cases/update-patient-use-case/index"
 import { PatientController } from "."
 
@@ -16,6 +17,10 @@ vi.mock("../../../use-cases/update-patient-use-case/index", () => ({
 
 vi.mock("../../../use-cases/get-patient-by-id-use-case", () => ({
   getPatientByIdUseCase: vi.fn(),
+}))
+
+vi.mock("../../../use-cases/list-patients-use-case", () => ({
+  listPatientsUseCase: vi.fn(),
 }))
 
 function createReplyMock() {
@@ -412,5 +417,89 @@ describe("PatientController.getById", () => {
       createdAt: "2026-03-07T10:00:00.000Z",
       updatedAt: "2026-03-07T11:00:00.000Z",
     })
+  })
+})
+
+describe("PatientController.list", () => {
+  const controller = new PatientController()
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("should throw UNAUTHENTICATED when orgId is missing", async () => {
+    const request = createRequestMock({
+      body: {},
+      orgId: undefined,
+    })
+    const reply = createReplyMock()
+
+    await expect(controller.list(request, reply)).rejects.toEqual(
+      expect.objectContaining({
+        status: 401,
+        code: "UNAUTHENTICATED",
+      }),
+    )
+
+    expect(listPatientsUseCase).not.toHaveBeenCalled()
+  })
+
+  it("should call use-case and return 200", async () => {
+    const request = createRequestMock({
+      body: {},
+      orgId: "org_123",
+    })
+    const reply = createReplyMock()
+
+    vi.mocked(listPatientsUseCase).mockResolvedValueOnce([
+      {
+        id: "deff7f0f-9684-4991-bfce-dc5da2fed3fa",
+        orgId: "org_123",
+        name: "Maria Silva",
+        sex: "female",
+        birthDate: "1990-10-10",
+        rg: "123456789",
+        cpf: "12345678901",
+        phone: "11999998888",
+        email: "maria@example.com",
+        zipCode: "01310100",
+        street: "Rua A",
+        streetNumber: "100",
+        neighborhood: "Centro",
+        city: "Sao Paulo",
+        state: "SP",
+        createdAt: "2026-03-07T10:00:00.000Z",
+        updatedAt: "2026-03-07T11:00:00.000Z",
+      },
+    ])
+
+    await controller.list(request, reply)
+
+    expect(listPatientsUseCase).toHaveBeenCalledWith({
+      orgId: "org_123",
+    })
+
+    expect(reply.status).toHaveBeenCalledWith(200)
+    expect(reply.send).toHaveBeenCalledWith([
+      {
+        id: "deff7f0f-9684-4991-bfce-dc5da2fed3fa",
+        orgId: "org_123",
+        name: "Maria Silva",
+        sex: "female",
+        birthDate: "1990-10-10",
+        rg: "123456789",
+        cpf: "12345678901",
+        phone: "11999998888",
+        email: "maria@example.com",
+        zipCode: "01310100",
+        street: "Rua A",
+        streetNumber: "100",
+        neighborhood: "Centro",
+        city: "Sao Paulo",
+        state: "SP",
+        createdAt: "2026-03-07T10:00:00.000Z",
+        updatedAt: "2026-03-07T11:00:00.000Z",
+      },
+    ])
   })
 })

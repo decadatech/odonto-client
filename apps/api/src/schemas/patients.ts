@@ -51,3 +51,5 @@ export const updatePatientParamsSchema = z.object({
 export const updatePatientBodySchema = createPatientBodySchema
 
 export const updatePatientResponseSchema = getPatientResponseSchema
+
+export const listPatientsResponseSchema = z.array(getPatientResponseSchema)

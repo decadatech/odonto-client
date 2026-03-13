@@ -3,6 +3,7 @@ import type { FastifyReply, FastifyRequest } from "fastify"
 import { getPatientByIdUseCase } from "../../../use-cases/get-patient-by-id-use-case"
 import { createPatientUseCase } from "../../../use-cases/create-patient-use-case/index"
 import { updatePatientUseCase } from "../../../use-cases/update-patient-use-case/index"
+import { listPatientsUseCase } from "../../../use-cases/list-patients-use-case"
 import {
   createPatientBodySchema,
   getPatientByIdParamsSchema,
@@ -84,5 +85,20 @@ export class PatientController {
     })
 
     return reply.status(200).send(patient)
+  }
+
+  async list(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const orgId = request.requestContext.get("orgId")
+
+    if (!orgId) {
+      throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
+    }
+
+    const patients = await listPatientsUseCase({ orgId })
+
+    return reply.status(200).send(patients)
   }
 }
