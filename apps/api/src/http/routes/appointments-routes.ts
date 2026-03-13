@@ -7,6 +7,7 @@ import {
   createAppointmentResponseSchema,
   getAppointmentByIdParamsSchema,
   getAppointmentByIdResponseSchema,
+  listAppointmentsResponseSchema,
   updateAppointmentBodySchema,
   updateAppointmentParamsSchema,
   updateAppointmentResponseSchema,
@@ -14,6 +15,19 @@ import {
 
 export const appointmentsRoutes: FastifyPluginAsyncZod = async (app) => {
   const appointmentController = new AppointmentController()
+
+  app.get(
+    "/appointments",
+    {
+      preHandler: [ensureAuthenticated],
+      schema: {
+        response: {
+          200: listAppointmentsResponseSchema,
+        },
+      },
+    },
+    appointmentController.list.bind(appointmentController),
+  )
 
   app.post(
     "/appointments",

@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify"
 
 import { createAppointmentUseCase } from "../../../use-cases/create-appointment-use-case/index"
 import { getAppointmentByIdUseCase } from "../../../use-cases/get-appointment-by-id-use-case/index"
+import { listAppointmentsUseCase } from "../../../use-cases/list-appointments-use-case/index"
 import { updateAppointmentUseCase } from "../../../use-cases/update-appointment-use-case/index"
 import {
   createAppointmentBodySchema,
@@ -12,6 +13,21 @@ import {
 import { AppError } from "../../errors/app-error"
 
 export class AppointmentController {
+  async list(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const orgId = request.requestContext.get("orgId")
+
+    if (!orgId) {
+      throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
+    }
+
+    const appointments = await listAppointmentsUseCase({ orgId })
+
+    return reply.status(200).send(appointments)
+  }
+
   async create(
     request: FastifyRequest,
     reply: FastifyReply,

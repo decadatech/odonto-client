@@ -32,6 +32,8 @@ export const getAppointmentByIdResponseSchema = appointmentResponseSchema.extend
   dentist: appointmentDentistSchema,
 })
 
+export const listAppointmentsResponseSchema = z.array(getAppointmentByIdResponseSchema)
+
 export const createAppointmentBodySchema = z
   .object({
     patientId: z.uuid(),
