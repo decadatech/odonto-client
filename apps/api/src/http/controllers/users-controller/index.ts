@@ -2,10 +2,35 @@ import type { FastifyReply, FastifyRequest } from "fastify"
 
 import { createUserUseCase } from "../../../use-cases/create-user-use-case/index"
 import { getUserByExternalIdUseCase } from "../../../use-cases/get-user-by-external-id-use-case/index"
-import { createUserBodySchema, getUserByExternalIdParamsSchema } from "../../../schemas/users"
+import { listUsersUseCase } from "../../../use-cases/list-users-use-case"
+import {
+  createUserBodySchema,
+  getUserByExternalIdParamsSchema,
+  listUsersQuerySchema,
+} from "../../../schemas/users"
 import { AppError } from "../../errors/app-error"
 
 export class UsersController {
+  async list(
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) {
+    const orgId = request.requestContext.get("orgId")
+
+    if (!orgId) {
+      throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
+    }
+
+    const query = listUsersQuerySchema.parse(request.query)
+
+    const users = await listUsersUseCase({
+      orgId,
+      roles: query.role,
+    })
+
+    return reply.status(200).send(users)
+  }
+
   async getByExternalId(
     request: FastifyRequest,
     reply: FastifyReply,

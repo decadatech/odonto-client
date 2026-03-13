@@ -7,10 +7,26 @@ import {
   createUserResponseSchema,
   getUserByExternalIdParamsSchema,
   getUserByExternalIdResponseSchema,
+  listUsersQuerySchema,
+  listUsersResponseSchema,
 } from "../../schemas/users"
 
 export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
   const usersController = new UsersController()
+
+  app.get(
+    "/users",
+    {
+      preHandler: [ensureAuthenticated],
+      schema: {
+        querystring: listUsersQuerySchema,
+        response: {
+          200: listUsersResponseSchema,
+        },
+      },
+    },
+    usersController.list.bind(usersController),
+  )
 
   app.get(
     "/users/external_id/:user_id",
