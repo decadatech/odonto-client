@@ -1,10 +1,20 @@
 import { z } from "zod"
 
+const appointmentPatientSchema = z.object({
+  id: z.uuid(),
+  name: z.string().min(1),
+})
+
+const appointmentDentistSchema = z.object({
+  id: z.uuid(),
+  name: z.string().min(1),
+})
+
 const appointmentResponseSchema = z.object({
   id: z.uuid(),
   orgId: z.string().min(1),
   patientId: z.uuid(),
-  dentistUserId: z.string().min(1),
+  dentistUserId: z.uuid(),
   startsAt: z.iso.datetime(),
   endsAt: z.iso.datetime(),
   title: z.string().min(1),
@@ -17,7 +27,10 @@ export const getAppointmentByIdParamsSchema = z.object({
   appointment_id: z.uuid(),
 })
 
-export const getAppointmentByIdResponseSchema = appointmentResponseSchema
+export const getAppointmentByIdResponseSchema = appointmentResponseSchema.extend({
+  patient: appointmentPatientSchema,
+  dentist: appointmentDentistSchema,
+})
 
 export const createAppointmentBodySchema = z
   .object({
