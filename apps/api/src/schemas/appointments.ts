@@ -37,7 +37,7 @@ export const listAppointmentsResponseSchema = z.array(getAppointmentByIdResponse
 export const createAppointmentBodySchema = z
   .object({
     patientId: z.uuid(),
-    dentistUserId: z.string().trim().min(1),
+    dentistUserId: z.uuid(),
     startsAt: z.iso.datetime(),
     endsAt: z.iso.datetime(),
     title: z.string().trim().min(1),

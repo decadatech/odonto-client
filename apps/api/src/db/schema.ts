@@ -72,7 +72,9 @@ export const appointments = pgTable(
     patientId: uuid("patient_id")
       .notNull()
       .references(() => patients.id, { onDelete: "restrict" }),
-    dentistUserId: text("dentist_user_id").notNull(),
+    dentistUserId: uuid("dentist_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
     title: text("title").notNull(),

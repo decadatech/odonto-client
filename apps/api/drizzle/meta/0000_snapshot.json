@@ -1,5 +1,5 @@
 {
-  "id": "5f9fb59f-73b2-41e9-b045-382f13ad506f",
+  "id": "49ab85d7-00ff-44f9-9dad-99c531e4efa4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -29,7 +29,7 @@
         },
         "dentist_user_id": {
           "name": "dentist_user_id",
-          "type": "text",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -156,6 +156,19 @@
           ],
           "onDelete": "restrict",
           "onUpdate": "no action"
+        },
+        "appointments_dentist_user_id_users_id_fk": {
+          "name": "appointments_dentist_user_id_users_id_fk",
+          "tableFrom": "appointments",
+          "tableTo": "users",
+          "columnsFrom": [
+            "dentist_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -231,7 +244,7 @@
         },
         "zip_code": {
           "name": "zip_code",
-          "type": "varchar",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": true
         },
@@ -261,7 +274,7 @@
         },
         "state": {
           "name": "state",
-          "type": "varchar(2)",
+          "type": "varchar(5)",
           "primaryKey": false,
           "notNull": true
         },
@@ -358,9 +371,75 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "patients_org_name_idx": {
-          "name": "patients_org_name_idx",
+        "clerk_id": {
+          "name": "clerk_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "user_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cro": {
+          "name": "cro",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "users_org_clerk_id_unique": {
+          "name": "users_org_clerk_id_unique",
           "columns": [
             {
               "expression": "org_id",
@@ -369,7 +448,37 @@
               "nulls": "last"
             },
             {
-              "expression": "name",
+              "expression": "clerk_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "users_org_id_idx": {
+          "name": "users_org_id_idx",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "users_clerk_id_idx": {
+          "name": "users_clerk_id_idx",
+          "columns": [
+            {
+              "expression": "clerk_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -397,6 +506,14 @@
         "male",
         "female",
         "other"
+      ]
+    },
+    "public.user_role": {
+      "name": "user_role",
+      "schema": "public",
+      "values": [
+        "secretary",
+        "dentist"
       ]
     }
   },
