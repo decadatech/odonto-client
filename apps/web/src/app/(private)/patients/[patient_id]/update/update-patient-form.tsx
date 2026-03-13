@@ -1,7 +1,10 @@
 "use client"
 
 import { useEffect } from "react"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
+import { Button } from "@workspace/ui/components/button"
 import { updatePatientAction } from "@/app/actions/update-patient"
 import { PatientForm, type PatientFormValues } from "@/components/patient-form"
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
@@ -30,7 +33,14 @@ export function UpdatePatientForm({ patientId, initialValues }: UpdatePatientFor
 
   return (
     <div className="p-6">
-      <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground">Editar paciente</h1>
+      <div className="mb-6 flex items-center gap-3">
+        <Button asChild type="button" variant="outline" size="icon" aria-label="Voltar">
+          <Link href="/patients">
+            <ArrowLeft className="size-4" />
+          </Link>
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Editar paciente</h1>
+      </div>
 
       <PatientForm
         action={action}
