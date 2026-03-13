@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { createUserUseCase } from "../../../use-cases/create-user-use-case/index"
 import { getUserByExternalIdUseCase } from "../../../use-cases/get-user-by-external-id-use-case/index"
 import { UsersController } from "."
+import { AppError } from "../../errors/app-error"
 
 vi.mock("../../../use-cases/create-user-use-case/index", () => ({
   createUserUseCase: vi.fn(),
@@ -97,7 +98,7 @@ describe("UsersController.getByExternalId", () => {
     expect(getUserByExternalIdUseCase).not.toHaveBeenCalled()
   })
 
-  it("should throw USER_NOT_FOUND when use-case returns undefined", async () => {
+  it("should propagate USER_NOT_FOUND thrown by use-case", async () => {
     const request = createRequestMock({
       body: {},
       params: { user_id: "user_123" },
@@ -105,7 +106,9 @@ describe("UsersController.getByExternalId", () => {
     })
     const reply = createReplyMock()
 
-    vi.mocked(getUserByExternalIdUseCase).mockResolvedValueOnce(undefined)
+    vi.mocked(getUserByExternalIdUseCase).mockRejectedValueOnce(
+      new AppError(404, "USER_NOT_FOUND", "User not found"),
+    )
 
     await expect(controller.getByExternalId(request, reply)).rejects.toEqual(
       expect.objectContaining({

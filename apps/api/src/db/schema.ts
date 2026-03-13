@@ -63,9 +63,38 @@ export const patients = pgTable(
   ],
 )
 
-// Minimal example table to bootstrap Drizzle migrations.
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-})
+export const appointments = pgTable(
+  "appointments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    orgId: text("org_id").notNull(),
+    patientId: uuid("patient_id")
+      .notNull()
+      .references(() => patients.id, { onDelete: "restrict" }),
+    dentistUserId: text("dentist_user_id").notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("appointments_org_id_idx").on(table.orgId),
+    index("appointments_org_dentist_starts_at_idx").on(
+      table.orgId,
+      table.dentistUserId,
+      table.startsAt,
+    ),
+    index("appointments_org_patient_starts_at_idx").on(
+      table.orgId,
+      table.patientId,
+      table.startsAt,
+    ),
+    check("appointments_time_check", sql`${table.endsAt} > ${table.startsAt}`),
+  ],
+)
+
+export type Patient = typeof patients.$inferSelect
+export type User = typeof users.$inferSelect
+export type Appointment = typeof appointments.$inferSelect

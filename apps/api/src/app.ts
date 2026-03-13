@@ -7,7 +7,9 @@ import {
 } from "fastify-type-provider-zod"
 
 import { healthCheckRoutes } from "./http/routes/health-check-routes"
+import { appointmentsRoutes } from "./http/routes/appointments-routes"
 import { patientsRoutes } from "./http/routes/patients-routes"
+import { usersRoutes } from "./http/routes/users-routes"
 import { registerGlobalErrorHandler } from "./http/errors/error-handler"
 
 export function buildApp() {
@@ -21,7 +23,9 @@ export function buildApp() {
   registerGlobalErrorHandler(app)
 
   app.register(healthCheckRoutes)
+  app.register(usersRoutes)
   app.register(patientsRoutes)
+  app.register(appointmentsRoutes)
 
   return app
 }

@@ -23,10 +23,6 @@ export class UsersController {
       clerkId: params.user_id,
     })
 
-    if (!user) {
-      throw new AppError(404, "USER_NOT_FOUND", "User not found")
-    }
-
     return reply.status(200).send(user)
   }
 
