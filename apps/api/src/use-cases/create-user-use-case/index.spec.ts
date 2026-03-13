@@ -22,6 +22,7 @@ describe("createUserUseCase", () => {
   const input: CreateUserUseCaseInput = {
     orgId: "org_123",
     clerkId: "user_123",
+    name: "Maria Silva",
     role: "dentist",
     cro: "123456",
   }
@@ -68,6 +69,7 @@ describe("createUserUseCase", () => {
         id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
         clerkId: input.clerkId,
         orgId: input.orgId,
+        name: input.name,
         role: input.role,
         cro: input.cro,
         createdAt: now,
@@ -80,6 +82,7 @@ describe("createUserUseCase", () => {
     expect(insertValuesMock).toHaveBeenCalledWith({
       orgId: input.orgId,
       clerkId: input.clerkId,
+      name: input.name,
       role: input.role,
       cro: input.cro,
     })
@@ -88,6 +91,7 @@ describe("createUserUseCase", () => {
       id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
       clerkId: input.clerkId,
       orgId: input.orgId,
+      name: input.name,
       role: input.role,
       cro: input.cro,
       createdAt: "2026-03-08T12:00:00.000Z",

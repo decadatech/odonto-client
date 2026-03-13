@@ -138,6 +138,7 @@ describe("UsersController.getByExternalId", () => {
       id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
       clerkId: "user_123",
       orgId: "org_123",
+      name: "Maria Silva",
       role: "dentist",
       cro: "123456",
       createdAt: "2026-03-08T12:00:00.000Z",
@@ -155,6 +156,7 @@ describe("UsersController.getByExternalId", () => {
       id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
       clerkId: "user_123",
       orgId: "org_123",
+      name: "Maria Silva",
       role: "dentist",
       cro: "123456",
       createdAt: "2026-03-08T12:00:00.000Z",
@@ -214,6 +216,7 @@ describe("UsersController.list", () => {
         id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
         clerkId: "user_123",
         orgId: "org_123",
+        name: "Maria Silva",
         role: "dentist",
         cro: "123456",
         createdAt: "2026-03-08T12:00:00.000Z",
@@ -233,6 +236,7 @@ describe("UsersController.list", () => {
         id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
         clerkId: "user_123",
         orgId: "org_123",
+        name: "Maria Silva",
         role: "dentist",
         cro: "123456",
         createdAt: "2026-03-08T12:00:00.000Z",
@@ -252,6 +256,7 @@ describe("UsersController.create", () => {
   it("should throw UNAUTHENTICATED when orgId or userId is missing", async () => {
     const request = createRequestMock({
       body: {
+        name: "Maria Silva",
         role: "secretary",
       },
       orgId: "org_123",
@@ -272,6 +277,7 @@ describe("UsersController.create", () => {
   it("should throw when request body is invalid", async () => {
     const request = createRequestMock({
       body: {
+        name: "Maria Silva",
         role: "invalid-role",
       },
       orgId: "org_123",
@@ -287,6 +293,7 @@ describe("UsersController.create", () => {
   it("should call use-case and return 201", async () => {
     const request = createRequestMock({
       body: {
+        name: "Maria Silva",
         role: "dentist",
         cro: "123456",
       },
@@ -299,6 +306,7 @@ describe("UsersController.create", () => {
       id: "7be70a0a-5a25-489b-8de0-af198f7cfd4d",
       clerkId: "user_123",
       orgId: "org_123",
+      name: "Maria Silva",
       role: "dentist",
       cro: "123456",
       createdAt: "2026-03-08T12:00:00.000Z",
@@ -310,6 +318,7 @@ describe("UsersController.create", () => {
     expect(createUserUseCase).toHaveBeenCalledWith({
       orgId: "org_123",
       clerkId: "user_123",
+      name: "Maria Silva",
       role: "dentist",
       cro: "123456",
     })

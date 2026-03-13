@@ -11,6 +11,7 @@ type UserRole = "secretary" | "dentist"
 export type CreateUserUseCaseInput = {
   orgId: string
   clerkId: string
+  name: string
   role: UserRole
   cro?: string | null
 }
@@ -44,6 +45,7 @@ export async function createUserUseCase(
     .values({
       orgId: input.orgId,
       clerkId: input.clerkId,
+      name: input.name,
       role: input.role,
       cro: input.cro ?? null,
     })

@@ -67,6 +67,7 @@ export class UsersController {
     const user = await createUserUseCase({
       orgId,
       clerkId: userId,
+      name: body.name,
       role: body.role,
       cro: body.cro,
     })

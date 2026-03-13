@@ -20,6 +20,7 @@ export const users = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     clerkId: text("clerk_id").notNull(),
     orgId: text("org_id").notNull(),
+    name: text("name").notNull(),
     role: userRoleEnum("role").notNull(),
     cro: varchar("cro", { length: 20 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),

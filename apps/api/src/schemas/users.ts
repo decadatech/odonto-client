@@ -6,6 +6,7 @@ export const userResponseSchema = z.object({
   id: z.uuid(),
   clerkId: z.string().min(1),
   orgId: z.string().min(1),
+  name: z.string().min(1),
   role: userRoleSchema,
   cro: z.string().max(20).nullable(),
   createdAt: z.iso.datetime(),
@@ -48,6 +49,7 @@ export const getUserByExternalIdResponseSchema = userResponseSchema
 
 export const createUserBodySchema = z
   .object({
+    name: z.string().min(1).trim(),
     role: userRoleSchema,
     cro: z.string().max(20).trim().optional().nullable(),
   })

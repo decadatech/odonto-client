@@ -1,7 +1,7 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 
 import { backendErrorSchema } from "@/schemas/api"
 import { createDomainUserPayloadSchema, domainUserSchema } from "@/schemas/users"
@@ -64,12 +64,14 @@ export async function createCurrentDomainUserAction(
 ): Promise<CreateCurrentDomainUserState> {
   const { getToken } = await auth()
   const token = await getToken()
+  const clerkUser = await currentUser()
 
-  if (!token) {
+  if (!token || !clerkUser) {
     return { code: "UNAUTHENTICATED" }
   }
 
   const payload = createDomainUserPayloadSchema.safeParse({
+    name: clerkUser.fullName?.trim() || clerkUser.firstName?.trim() || "",
     role: String(formData.get("role") ?? ""),
     cro: String(formData.get("cro") ?? "").trim() || null,
   })

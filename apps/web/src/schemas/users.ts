@@ -4,6 +4,7 @@ export const domainUserSchema = z.object({
   id: z.uuid(),
   clerkId: z.string().min(1),
   orgId: z.string().min(1),
+  name: z.string().min(1).max(240),
   role: z.enum(["secretary", "dentist"]),
   cro: z.string().max(20).nullable(),
   createdAt: z.iso.datetime(),
@@ -12,6 +13,7 @@ export const domainUserSchema = z.object({
 
 export const createDomainUserPayloadSchema = z
   .object({
+    name: z.string().min(1).max(240).trim(),
     role: z.enum(["secretary", "dentist"]),
     cro: z.string().max(20).trim().optional().nullable(),
   })
