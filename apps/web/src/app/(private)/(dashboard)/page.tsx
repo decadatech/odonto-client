@@ -1,30 +1,53 @@
-"use client"
+import { listAppointmentsAction } from "@/app/actions/appointments"
+import { listPatientsAction } from "@/app/actions/patients"
+import { listDentistsAction } from "@/app/actions/users"
+import type { ScheduleAppointment } from "@/components/schedule"
+import type {
+  ScheduleAppointmentColor,
+  ScheduleDentistOption,
+} from "@/components/schedule/types"
 
-import { useEffect } from "react";
+import { SchedulePageContent } from "./schedule-page-content"
 
-import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+export default async function Dashboard() {
+  const [patients, dentists, appointments] = await Promise.all([
+    listPatientsAction(),
+    listDentistsAction(),
+    listAppointmentsAction(),
+  ])
 
-export default function Dashboard() {
-  const { setBreadcrumbs } = useBreadcrumbs();
+  const dentistColors: ScheduleAppointmentColor[] = ["teal", "amber", "rose", "violet", "sky"]
+  const dentistsWithColor: ScheduleDentistOption[] = dentists.map((dentist, index) => ({
+    ...dentist,
+    color: dentistColors[index % dentistColors.length]!,
+  }))
 
-  useEffect(() => {
-    setBreadcrumbs([
-      { label: "Página inicial", href: "/" }
-    ]);
+  const dentistColorById = new Map(dentistsWithColor.map((dentist) => [dentist.id, dentist.color]))
 
-    return () => {
-      setBreadcrumbs([])
-    }
-  }, [setBreadcrumbs]);
+  const mappedAppointments: ScheduleAppointment[] = appointments.map((appointment) => ({
+    id: appointment.id,
+    title: appointment.title,
+    description: appointment.description ?? undefined,
+    start: new Date(appointment.startsAt),
+    end: new Date(appointment.endsAt),
+    dentistId: appointment.dentist.id,
+    dentistName: appointment.dentist.name,
+    patientName: appointment.patient.name,
+    color: dentistColorById.get(appointment.dentist.id),
+    status: "scheduled",
+  }))
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
-        <div className="aspect-video rounded-xl bg-muted/50" />
-      </div>
-      <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-    </div>
+    <SchedulePageContent
+      breadcrumbs={[
+        { label: "Página inicial", href: "/" },
+      ]}
+      initialAppointments={mappedAppointments}
+      dentists={dentistsWithColor}
+      patients={patients.map((patient) => ({
+        id: patient.id,
+        name: patient.nome,
+      }))}
+    />
   )
 }

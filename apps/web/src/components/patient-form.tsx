@@ -36,7 +36,7 @@ export type PatientFormValues = {
   rg: string
   cpf: string
   phone: string
-  email: string
+  email: string | null
   zipCode: string
   street: string
   streetNumber: string
@@ -163,7 +163,7 @@ export function PatientForm({ action, submitLabel, mode, initialValues }: Patien
               <Label htmlFor="email" className="inline-block text-muted-foreground">E-mail</Label>
               <Badge variant="secondary" className="h-4 px-0.5 text-[10px] text-muted-foreground">Opcional</Badge>
             </div>
-            <Input id="email" name="email" type="email" maxLength={240} defaultValue={initialValues?.email} />
+            <Input id="email" name="email" type="email" maxLength={240} defaultValue={initialValues?.email ?? ""} />
           </div>
         </div>
       </section>

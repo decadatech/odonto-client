@@ -17,7 +17,7 @@ import {
 } from "@workspace/ui/components/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip"
 
-import { formatRG, formatPhoneNumber } from "@/lib/formatters"
+import { formatRG, formatPhoneNumber } from "@/utils/formatters"
 
 import { type Patient } from "@/types/patient"
 
@@ -44,12 +44,13 @@ function TableActions({ onEdit, onDelete, onDetails }: TableActionsProps) {
             variant="ghost"
             size="icon"
             className="hover:bg-primary/10 hover:text-primary transition-colors"
+            disabled
             onClick={onDetails}
           >
             <Eye className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Ir para detalhes do paciente</TooltipContent>
+        <TooltipContent>Em breve</TooltipContent>
       </Tooltip>
 
       <Tooltip>
@@ -72,12 +73,13 @@ function TableActions({ onEdit, onDelete, onDetails }: TableActionsProps) {
             variant="ghost"
             size="icon"
             className="hover:bg-red-50 hover:text-red-600 transition-colors"
+            disabled
             onClick={onDelete}
           >
             <Trash className="h-4 w-4" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Excluir paciente</TooltipContent>
+        <TooltipContent>Em breve</TooltipContent>
       </Tooltip>
     </div>
   )
@@ -118,7 +120,7 @@ export function PatientsTable({
         </TableHeader>
 
         {patients.length === 0 && !isLoading && (
-          <TableCaption>Nenhum paciente encontrado</TableCaption>
+          <TableCaption className="my-4">Nenhum paciente encontrado</TableCaption>
         )}
 
         <TableBody>

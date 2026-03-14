@@ -23,7 +23,15 @@ export function SearchInput() {
     } else {
       params.delete('search')
     }
-    router.replace(`/patients?${params.toString()}`)
+
+    const currentQuery = searchParams.toString()
+    const nextQuery = params.toString()
+
+    if (currentQuery === nextQuery) {
+      return
+    }
+
+    router.replace(nextQuery ? `/patients?${nextQuery}` : '/patients')
   }, [debouncedSearch, router, searchParams])
 
   const handleSearch = (value: string) => {

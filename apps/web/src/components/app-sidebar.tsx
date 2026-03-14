@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useOrganization } from "@clerk/nextjs";
 import {
   CalendarDays,
   Users
@@ -46,9 +47,12 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Root>) {
+  const { organization, isLoaded } = useOrganization()
+  const clinicName = isLoaded ? organization?.name ?? "Nome da clínica" : ""
+
   return (
     <Sidebar.Root {...props}>
-      <Sidebar.Header title="Nome da clínica" />
+      <Sidebar.Header title={clinicName} />
 
       <Sidebar.Content>
         {data.navMain.map((item) => (

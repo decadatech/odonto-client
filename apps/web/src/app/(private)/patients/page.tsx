@@ -1,75 +1,80 @@
 "use client"
 
-import { use, Suspense, useEffect } from 'react'
+import { Suspense, use, useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
-import { LoadingIndicator } from "@/components/loading-indicator"
 import { PatientsTable } from "./patients-table"
-import { SearchInput } from './search-input'
+import { SearchInput } from "./search-input"
 
-import { useInfinitePatients } from "@/hooks/queries/patients"
-import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
-import { useBreadcrumbs } from '@/hooks/use-breadcrumbs'
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
+import { listPatientsAction } from "@/app/actions/patients"
 
-import type { Pagination } from '@/types/api'
+import type { Pagination } from "@/types/api"
+import type { Patient } from "@/types/patient"
 
 interface PatientsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function Patients({ searchParams }: PatientsPageProps) {  
-  const { search, sort_order } = use(searchParams) as { search: string, sort_order: Pagination['sort_order'] }
-  const { setBreadcrumbs } = useBreadcrumbs();
+export default function Patients({ searchParams }: PatientsPageProps) {
+  const router = useRouter()
+  const { search, sort_order } = use(searchParams) as {
+    search: string
+    sort_order: Pagination["sort_order"]
+  }
 
-  const {
-    data: patientsData,
-    isFetching,
-    hasNextPage,
-    fetchNextPage,
-    isFetchingNextPage,
-  } = useInfinitePatients({ sort_order: sort_order || 'asc', search })
-  const patients = patientsData?.pages.flatMap(page => page.data) ?? []
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const { setBreadcrumbs } = useBreadcrumbs()
 
-  const loadMoreRef = useInfiniteScroll(
-    () => {
-      if (hasNextPage && !isFetchingNextPage) {
-        fetchNextPage()
+  useEffect(() => {
+    async function loadPatients() {
+      try {
+        setIsLoading(true)
+
+        const result = await listPatientsAction({
+          search,
+          sortOrder: sort_order,
+        })
+
+        setPatients(result)
+      } finally {
+        setIsLoading(false)
       }
-    },
-    hasNextPage && !isFetchingNextPage
-  )
+    }
+
+    void loadPatients()
+  }, [search, sort_order])
 
   useEffect(() => {
     setBreadcrumbs([
       { label: "Página inicial", href: "/" },
       { label: "Pacientes", href: "/patients" },
-    ]);
-    
+    ])
+
     return () => {
       setBreadcrumbs([])
     }
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs])
 
   const handleEdit = (id: string) => {
-    // TODO
-    console.log("Edit patient", id)
+    router.push(`/patients/${id}/update`)
   }
 
   const handleDelete = (id: string) => {
-    // TODO
     console.log("Delete patient", id)
   }
 
   const handleDetails = (id: string) => {
-    // TODO
     console.log("View patient details", id)
   }
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6 gap-2">
+      <div className="mb-6 flex items-center justify-between gap-2">
         <Suspense>
           <SearchInput />
         </Suspense>
@@ -85,16 +90,12 @@ export default function Patients({ searchParams }: PatientsPageProps) {
       <Suspense>
         <PatientsTable
           patients={patients}
-          isLoading={isFetching}
+          isLoading={isLoading}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onDetails={handleDetails}
         />
       </Suspense>
-
-      <LoadingIndicator label="Carregando pacientes..." isLoading={isFetching} />
-
-      <div ref={loadMoreRef} className="h-0 w-full" />
     </div>
   )
 }
