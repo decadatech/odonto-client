@@ -2,7 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import {
+  CalendarDays,
+  Users
+} from "lucide-react"
 
 import { Collapsible } from "@workspace/ui/components/collapsible";
 import {
@@ -14,12 +17,6 @@ import {
 } from "@workspace/ui/components/sidebar";
 import { Sidebar } from "./sidebar";
 
-import {
-  BriefcaseMedical,
-  CalendarDays,
-  Users
-} from "lucide-react"
-
 const data = {
   navMain: [
     {
@@ -27,7 +24,7 @@ const data = {
       items: [
         {
           title: "Agenda",
-          url: "#install",
+          url: "/",
           icon: CalendarDays,
           isActive: true,
         },
@@ -37,23 +34,18 @@ const data = {
           icon: Users,
           isActive: false,
         },
-        {
-          title: "Dentistas",
-          url: "#project",
-          icon: BriefcaseMedical,
-          isActive: false,
-        },
+        // {
+        //   title: "Dentistas",
+        //   url: "#project",
+        //   icon: BriefcaseMedical,
+        //   isActive: false,
+        // },
       ],
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Root>) {
-  const { user } = useUser()
-
-  const userName = user?.fullName ?? user?.firstName ?? 'Usuário'
-  const userEmail = user?.primaryEmailAddress?.emailAddress ?? ''
-
   return (
     <Sidebar.Root {...props}>
       <Sidebar.Header title="Nome da clínica" />
@@ -86,12 +78,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar.Roo
         ))}
       </Sidebar.Content>
 
-      <Sidebar.Footer
+      {/* <Sidebar.Footer
         user={{
           name: userName,
           email: userEmail,
         }}
-      />
+      /> */}
     </Sidebar.Root>
   );
 }
