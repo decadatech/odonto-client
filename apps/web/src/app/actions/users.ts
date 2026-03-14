@@ -2,19 +2,16 @@
 
 import { redirect } from "next/navigation"
 import { auth, currentUser } from "@clerk/nextjs/server"
+import { z } from "zod"
 
 import { backendErrorSchema } from "@/schemas/api"
 import { createDomainUserPayloadSchema, domainUserSchema } from "@/schemas/users"
 
-type GetCurrentDomainUserResult =
-  | { exists: true; user: ReturnType<typeof domainUserSchema.parse> }
+type GetCurrentDomainUserResponse =
+  | { exists: true; user: z.infer<typeof domainUserSchema> }
   | { exists: false }
 
-type CreateCurrentDomainUserState = {
-  code?: string
-}
-
-export async function getCurrentDomainUserAction(): Promise<GetCurrentDomainUserResult> {
+export async function getCurrentDomainUserAction(): Promise<GetCurrentDomainUserResponse> {
   const { userId, getToken } = await auth()
 
   if (!userId) {
@@ -58,10 +55,14 @@ export async function getCurrentDomainUserAction(): Promise<GetCurrentDomainUser
   }
 }
 
+type CreateCurrentDomainUserResponse = {
+  code?: string
+}
+
 export async function createCurrentDomainUserAction(
-  _state: CreateCurrentDomainUserState,
+  _state: CreateCurrentDomainUserResponse,
   formData: FormData,
-): Promise<CreateCurrentDomainUserState> {
+): Promise<CreateCurrentDomainUserResponse> {
   const { getToken } = await auth()
   const token = await getToken()
   const clerkUser = await currentUser()
@@ -101,4 +102,33 @@ export async function createCurrentDomainUserAction(
   }
 
   redirect("/")
+}
+
+type ListDentistsResponse = Array<z.infer<typeof domainUserSchema>>
+
+export async function listDentistsAction(): Promise<ListDentistsResponse> {
+  const { getToken } = await auth()
+  const token = await getToken()
+
+  if (!token) {
+    throw new Error("Unauthenticated request")
+  }
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users?role=dentist`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch dentists")
+  }
+
+  const responseData = await response.json()
+  const users = domainUserSchema.array().parse(responseData)
+
+  return users
 }
