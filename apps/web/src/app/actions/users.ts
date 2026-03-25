@@ -43,7 +43,14 @@ export async function getCurrentDomainUserAction(): Promise<GetCurrentDomainUser
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch domain user " + JSON.stringify(response.body),)
+    const errorBody = await response.text().catch(() => "<unreadable body>")
+    console.error("[getCurrentDomainUserAction] Request failed", {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      body: errorBody,
+    })
+    throw new Error(`Failed to fetch domain user — status: ${response.status}, body: ${errorBody}`)
   }
 
   const responseData = await response.json()
