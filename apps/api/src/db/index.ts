@@ -9,6 +9,7 @@ const pool = new Pool({
   user: env.DATABASE_USER,
   database: env.DATABASE_NAME,
   password: env.DATABASE_PASSWORD,
+  ssl: { rejectUnauthorized: false },
 })
 
 export const db = drizzle({ client: pool })
