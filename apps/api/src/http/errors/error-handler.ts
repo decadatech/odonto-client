@@ -58,6 +58,8 @@ export function registerGlobalErrorHandler(app: FastifyInstance) {
       details: "An unexpected error occurred",
     }
 
+    console.log(JSON.stringify(error, null, 2))
+
     return reply.status(payload.status).send(payload)
   })
 }
