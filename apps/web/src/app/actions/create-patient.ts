@@ -60,6 +60,14 @@ export async function createPatientAction(
     const responseData = await response.json().catch(() => null)
     const parsedError = backendErrorSchema.safeParse(responseData)
 
+    const errorBody = await response.text().catch(() => "<unreadable body>")
+    console.error("[createPatientAction] Request failed", {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      body: errorBody,
+    })
+
     if (parsedError.success) {
       return {
         code: parsedError.data.code,
