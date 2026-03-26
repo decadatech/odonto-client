@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, use, useEffect, useState } from "react"
+import { Suspense, use, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
@@ -10,10 +10,9 @@ import { PatientsTable } from "./patients-table"
 import { SearchInput } from "./search-input"
 
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
-import { listPatientsAction } from "@/app/actions/patients"
+import { usePatientsQuery } from "@/hooks/queries/patients"
 
 import type { Pagination } from "@/types/api"
-import type { Patient } from "@/types/patient"
 
 interface PatientsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -26,28 +25,14 @@ export default function Patients({ searchParams }: PatientsPageProps) {
     sort_order: Pagination["sort_order"]
   }
 
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const {
+    data: patients = [],
+    isLoading,
+  } = usePatientsQuery({
+    search,
+    sortOrder: sort_order,
+  })
   const { setBreadcrumbs } = useBreadcrumbs()
-
-  useEffect(() => {
-    async function loadPatients() {
-      try {
-        setIsLoading(true)
-
-        const result = await listPatientsAction({
-          search,
-          sortOrder: sort_order,
-        })
-
-        setPatients(result)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    void loadPatients()
-  }, [search, sort_order])
 
   useEffect(() => {
     setBreadcrumbs([
