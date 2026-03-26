@@ -5,7 +5,6 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
-import { updatePatientAction } from "@/app/actions/update-patient"
 import { PatientForm, type PatientFormValues } from "@/components/patient-form"
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
 
@@ -29,8 +28,6 @@ export function UpdatePatientForm({ patientId, initialValues }: UpdatePatientFor
     }
   }, [setBreadcrumbs])
 
-  const action = updatePatientAction.bind(null, patientId)
-
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center gap-3">
@@ -43,9 +40,9 @@ export function UpdatePatientForm({ patientId, initialValues }: UpdatePatientFor
       </div>
 
       <PatientForm
-        action={action}
         submitLabel="Salvar alterações"
         mode="update"
+        patientId={patientId}
         initialValues={initialValues}
       />
     </div>

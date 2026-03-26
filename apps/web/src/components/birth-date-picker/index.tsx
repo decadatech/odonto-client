@@ -20,6 +20,8 @@ type BirthDatePickerProps = {
   value?: string
   onValueChange?: (value: string) => void
   required?: boolean
+  className?: string
+  "aria-invalid"?: boolean
 }
 
 export function BirthDatePicker({
@@ -28,6 +30,8 @@ export function BirthDatePicker({
   value,
   onValueChange,
   required,
+  className,
+  "aria-invalid": ariaInvalid,
 }: BirthDatePickerProps) {
   const [date, setDate] = React.useState<Date | undefined>(() => {
     if (!value) return undefined
@@ -56,9 +60,11 @@ export function BirthDatePicker({
             type="button"
             variant="outline"
             id={id}
+            aria-invalid={ariaInvalid}
             className={cn(
               "h-9 w-full justify-start text-left font-normal",
               !date && "text-muted-foreground",
+              className,
             )}
           >
             <CalendarIcon className="mr-2 size-4" />

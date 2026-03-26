@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "jsdom",
+    environment: "happy-dom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.spec.ts", "src/**/*.spec.tsx"],

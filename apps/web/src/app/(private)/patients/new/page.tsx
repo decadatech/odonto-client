@@ -4,7 +4,6 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-import { createPatientAction } from "@/app/actions/create-patient"
 import { Button } from "@workspace/ui/components/button"
 import { PatientForm } from "@/components/patient-form"
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
@@ -36,7 +35,6 @@ export default function NewPatientPage() {
       </div>
 
       <PatientForm
-        action={createPatientAction}
         submitLabel="Cadastrar paciente"
         mode="create"
       />
