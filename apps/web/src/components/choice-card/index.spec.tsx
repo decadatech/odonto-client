@@ -1,6 +1,5 @@
 import * as React from "react"
-import { act } from "react"
-import { createRoot, type Root } from "react-dom/client"
+import { fireEvent, render, screen } from "@testing-library/react"
 
 import { ChoiceCard, type ChoiceCardOption } from "."
 
@@ -17,32 +16,9 @@ const ROLE_OPTIONS: ChoiceCardOption[] = [
   },
 ]
 
-let container: HTMLDivElement | null = null
-let root: Root | null = null
-
-function render(element: React.ReactNode) {
-  container = document.createElement("div")
-  document.body.appendChild(container)
-  root = createRoot(container)
-
-  act(() => {
-    root?.render(element)
-  })
-}
-
-afterEach(() => {
-  act(() => {
-    root?.unmount()
-  })
-
-  container?.remove()
-  container = null
-  root = null
-})
-
 describe("ChoiceCard", () => {
   it("should render options and sync hidden input with provided value", () => {
-    render(
+    const { container } = render(
       <ChoiceCard
         name="role"
         value="secretary"
@@ -50,16 +26,16 @@ describe("ChoiceCard", () => {
       />,
     )
 
-    expect(document.body.textContent).toContain("Secretário(a)")
-    expect(document.body.textContent).toContain("Dentista")
-    expect(document.body.textContent).toContain("Permissão a todas as ações da aplicação.")
+    expect(screen.getByText("Secretário(a)")).toBeTruthy()
+    expect(screen.getByText("Dentista")).toBeTruthy()
+    expect(screen.getByText("Permissão a todas as ações da aplicação.")).toBeTruthy()
 
-    const hiddenInput = document.querySelector('input[type="hidden"][name="role"]') as HTMLInputElement | null
+    const hiddenInput = container.querySelector('input[type="hidden"][name="role"]') as HTMLInputElement | null
 
     expect(hiddenInput?.value).toBe("secretary")
 
-    const secretaryRadio = document.getElementById("role-secretary")
-    const dentistRadio = document.getElementById("role-dentist")
+    const secretaryRadio = container.querySelector("#role-secretary")
+    const dentistRadio = container.querySelector("#role-dentist")
 
     expect(secretaryRadio?.getAttribute("data-state")).toBe("checked")
     expect(dentistRadio?.getAttribute("data-state")).toBe("unchecked")
@@ -67,8 +43,7 @@ describe("ChoiceCard", () => {
 
   it("should call onValueChange but keep current selection until parent updates the value", () => {
     const onValueChange = vi.fn()
-
-    render(
+    const { container } = render(
       <ChoiceCard
         name="role"
         value="secretary"
@@ -77,17 +52,15 @@ describe("ChoiceCard", () => {
       />,
     )
 
-    const dentistRadio = document.getElementById("role-dentist")
+    const dentistRadio = container.querySelector("#role-dentist")
 
-    act(() => {
-      dentistRadio?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
+    fireEvent.click(dentistRadio as Element)
 
     expect(onValueChange).toHaveBeenCalledWith("dentist")
-    expect(document.getElementById("role-secretary")?.getAttribute("data-state")).toBe("checked")
-    expect(document.getElementById("role-dentist")?.getAttribute("data-state")).toBe("unchecked")
+    expect(container.querySelector("#role-secretary")?.getAttribute("data-state")).toBe("checked")
+    expect(container.querySelector("#role-dentist")?.getAttribute("data-state")).toBe("unchecked")
     expect(
-      (document.querySelector('input[type="hidden"][name="role"]') as HTMLInputElement | null)?.value,
+      (container.querySelector('input[type="hidden"][name="role"]') as HTMLInputElement | null)?.value,
     ).toBe("secretary")
   })
 
@@ -105,18 +78,14 @@ describe("ChoiceCard", () => {
       )
     }
 
-    render(<ControlledChoiceCard />)
+    const { container } = render(<ControlledChoiceCard />)
 
-    const dentistRadio = document.getElementById("role-dentist")
+    fireEvent.click(container.querySelector("#role-dentist") as Element)
 
-    act(() => {
-      dentistRadio?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
-    })
-
-    expect(document.getElementById("role-secretary")?.getAttribute("data-state")).toBe("unchecked")
-    expect(document.getElementById("role-dentist")?.getAttribute("data-state")).toBe("checked")
+    expect(container.querySelector("#role-secretary")?.getAttribute("data-state")).toBe("unchecked")
+    expect(container.querySelector("#role-dentist")?.getAttribute("data-state")).toBe("checked")
     expect(
-      (document.querySelector('input[type="hidden"][name="role"]') as HTMLInputElement | null)?.value,
+      (container.querySelector('input[type="hidden"][name="role"]') as HTMLInputElement | null)?.value,
     ).toBe("dentist")
   })
 })

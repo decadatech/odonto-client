@@ -1,7 +1,6 @@
 /// <reference types="vitest/globals" />
 import * as React from "react"
-import { act } from "react"
-import { createRoot, type Root } from "react-dom/client"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 const mockToastError = vi.hoisted(() => vi.fn())
@@ -150,8 +149,6 @@ vi.mock("@workspace/ui/components/select", async () => {
 
 import { PatientForm, type PatientFormValues } from "@/components/patient-form"
 
-let container: HTMLDivElement | null = null
-let root: Root | null = null
 let queryClient: QueryClient
 
 const initialValues: PatientFormValues = {
@@ -170,19 +167,14 @@ const initialValues: PatientFormValues = {
   state: "SP",
 }
 
-function render(element: React.ReactNode) {
-  container = document.createElement("div")
-  document.body.appendChild(container)
-  root = createRoot(container)
+function renderWithProviders(element: React.ReactNode) {
   queryClient = new QueryClient()
 
-  act(() => {
-    root?.render(
-      <QueryClientProvider client={queryClient}>
-        {element}
-      </QueryClientProvider>,
-    )
-  })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      {element}
+    </QueryClientProvider>,
+  )
 }
 
 function getInput(id: string) {
@@ -196,11 +188,9 @@ function changeValue(element: HTMLInputElement | HTMLSelectElement, value: strin
       : HTMLSelectElement.prototype
   const valueSetter = Object.getOwnPropertyDescriptor(prototype, "value")?.set
 
-  act(() => {
-    valueSetter?.call(element, value)
-    element.dispatchEvent(new Event("input", { bubbles: true }))
-    element.dispatchEvent(new Event("change", { bubbles: true }))
-  })
+  valueSetter?.call(element, value)
+  fireEvent.input(element)
+  fireEvent.change(element)
 }
 
 beforeEach(() => {
@@ -210,19 +200,9 @@ beforeEach(() => {
   mockMutateAsync.mockResolvedValue(undefined)
 })
 
-afterEach(() => {
-  act(() => {
-    root?.unmount()
-  })
-
-  container?.remove()
-  container = null
-  root = null
-})
-
 describe("PatientForm", () => {
   it("should render an empty email field when initial email is null", () => {
-    render(
+    renderWithProviders(
       <PatientForm
         submitLabel="Salvar alterações"
         mode="update"
@@ -238,7 +218,7 @@ describe("PatientForm", () => {
   })
 
   it("should apply masks and sanitization to rg, cpf, phone and zip code fields", () => {
-    render(
+    renderWithProviders(
       <PatientForm
         submitLabel="Cadastrar paciente"
         mode="create"
@@ -257,7 +237,7 @@ describe("PatientForm", () => {
   })
 
   it("should block submission and show the birth date error when the field is missing", async () => {
-    render(
+    const { container } = renderWithProviders(
       <PatientForm
         submitLabel="Cadastrar paciente"
         mode="create"
@@ -268,20 +248,20 @@ describe("PatientForm", () => {
       />,
     )
 
-    await act(async () => {
-      document.querySelector("form")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
-    })
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement)
 
-    expect(mockMutateAsync).not.toHaveBeenCalled()
-    expect(document.body.textContent).toContain("Data de nascimento é obrigatória")
-    expect(getInput("birthDate").getAttribute("aria-invalid")).toBe("true")
+    await waitFor(() => {
+      expect(mockMutateAsync).not.toHaveBeenCalled()
+      expect(screen.getByText("Data de nascimento é obrigatória")).toBeTruthy()
+      expect(getInput("birthDate").getAttribute("aria-invalid")).toBe("true")
+    })
   })
 
   it("should show a toast with the mapped backend error message", async () => {
     const { PatientMutationError } = await import("@/hooks/mutations/patients")
     mockMutateAsync.mockRejectedValue(new PatientMutationError("PATIENT_CPF_ALREADY_EXISTS"))
 
-    render(
+    const { container } = renderWithProviders(
       <PatientForm
         submitLabel="Cadastrar paciente"
         mode="create"
@@ -301,15 +281,15 @@ describe("PatientForm", () => {
     changeValue(document.querySelector('select[name="sex"]') as HTMLSelectElement, initialValues.sex)
     changeValue(document.querySelector('select[name="state"]') as HTMLSelectElement, initialValues.state)
 
-    await act(async () => {
-      document.querySelector("form")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
-    })
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement)
 
-    expect(mockToastError).toHaveBeenCalledWith("Já existe um paciente com este CPF.")
+    await waitFor(() => {
+      expect(mockToastError).toHaveBeenCalledWith("Já existe um paciente com este CPF.")
+    })
   })
 
   it("should invalidate the patients query and navigate after a successful submission", async () => {
-    render(
+    const { container } = renderWithProviders(
       <PatientForm
         submitLabel="Cadastrar paciente"
         mode="create"
@@ -333,25 +313,26 @@ describe("PatientForm", () => {
     changeValue(document.querySelector('select[name="sex"]') as HTMLSelectElement, initialValues.sex)
     changeValue(document.querySelector('select[name="state"]') as HTMLSelectElement, initialValues.state)
 
-    await act(async () => {
-      document.querySelector("form")?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement)
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        name: initialValues.name,
+        sex: initialValues.sex,
+        birthDate: initialValues.birthDate,
+        rg: initialValues.rg,
+        cpf: initialValues.cpf,
+        phone: initialValues.phone,
+        email: "",
+        zipCode: initialValues.zipCode,
+        street: initialValues.street,
+        streetNumber: initialValues.streetNumber,
+        neighborhood: initialValues.neighborhood,
+        city: initialValues.city,
+        state: initialValues.state,
+      })
     })
 
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      name: initialValues.name,
-      sex: initialValues.sex,
-      birthDate: initialValues.birthDate,
-      rg: initialValues.rg,
-      cpf: initialValues.cpf,
-      phone: initialValues.phone,
-      email: "",
-      zipCode: initialValues.zipCode,
-      street: initialValues.street,
-      streetNumber: initialValues.streetNumber,
-      neighborhood: initialValues.neighborhood,
-      city: initialValues.city,
-      state: initialValues.state,
-    })
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: ["patients"],
     })

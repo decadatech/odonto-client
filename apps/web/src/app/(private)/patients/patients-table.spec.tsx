@@ -1,7 +1,6 @@
 /// <reference types="vitest/globals" />
 import * as React from "react"
-import { act } from "react"
-import { createRoot, type Root } from "react-dom/client"
+import { fireEvent, render, screen } from "@testing-library/react"
 
 const navigationMocks = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -24,9 +23,6 @@ vi.mock("@workspace/ui/components/tooltip", () => ({
 import { PatientsTable } from "@/app/(private)/patients/patients-table"
 import type { Patient } from "@/types/patient"
 
-let container: HTMLDivElement | null = null
-let root: Root | null = null
-
 const patients: Patient[] = [
   {
     id: "patient-1",
@@ -44,29 +40,9 @@ const patients: Patient[] = [
   },
 ]
 
-function render(element: React.ReactNode) {
-  container = document.createElement("div")
-  document.body.appendChild(container)
-  root = createRoot(container)
-
-  act(() => {
-    root?.render(element)
-  })
-}
-
 beforeEach(() => {
   navigationMocks.replace.mockClear()
   navigationMocks.searchParams = new URLSearchParams()
-})
-
-afterEach(() => {
-  act(() => {
-    root?.unmount()
-  })
-
-  container?.remove()
-  container = null
-  root = null
 })
 
 describe("PatientsTable", () => {
@@ -82,7 +58,7 @@ describe("PatientsTable", () => {
     )
 
     expect(document.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(40)
-    expect(document.body.textContent).not.toContain("Nenhum paciente encontrado")
+    expect(screen.queryByText("Nenhum paciente encontrado")).toBeNull()
   })
 
   it("should render the empty state when there are no patients", () => {
@@ -96,7 +72,7 @@ describe("PatientsTable", () => {
       />,
     )
 
-    expect(document.body.textContent).toContain("Nenhum paciente encontrado")
+    expect(screen.getByText("Nenhum paciente encontrado")).toBeTruthy()
   })
 
   it("should render patient data, format fields, and call edit action", () => {
@@ -114,21 +90,21 @@ describe("PatientsTable", () => {
       />,
     )
 
-    expect(document.body.textContent).toContain("Maria Silva")
-    expect(document.body.textContent).toContain("12.345.678-9")
-    expect(document.body.textContent).toContain("(11) 99999-8888")
-    expect(document.body.textContent).toContain("MS")
+    expect(screen.getByText("Maria Silva")).toBeTruthy()
+    expect(screen.getByText("12.345.678-9")).toBeTruthy()
+    expect(screen.getByText("(11) 99999-8888")).toBeTruthy()
+    expect(screen.getByText("MS")).toBeTruthy()
 
-    const firstRowButtons = document.querySelectorAll("tbody tr:first-child button")
+    const firstRow = screen.getByText("Maria Silva").closest("tr")
+    const firstRowButtons = firstRow?.querySelectorAll("button")
+
     expect(firstRowButtons).toHaveLength(3)
-    expect((firstRowButtons[0] as HTMLButtonElement).disabled).toBe(true)
-    expect((firstRowButtons[2] as HTMLButtonElement).disabled).toBe(true)
+    expect((firstRowButtons?.[0] as HTMLButtonElement).disabled).toBe(true)
+    expect((firstRowButtons?.[2] as HTMLButtonElement).disabled).toBe(true)
 
-    act(() => {
-      ;(firstRowButtons[1] as HTMLButtonElement).click()
-      ;(firstRowButtons[0] as HTMLButtonElement).click()
-      ;(firstRowButtons[2] as HTMLButtonElement).click()
-    })
+    fireEvent.click(firstRowButtons?.[1] as HTMLButtonElement)
+    fireEvent.click(firstRowButtons?.[0] as HTMLButtonElement)
+    fireEvent.click(firstRowButtons?.[2] as HTMLButtonElement)
 
     expect(onEdit).toHaveBeenCalledWith("patient-1")
     expect(onDetails).not.toHaveBeenCalled()
@@ -148,11 +124,7 @@ describe("PatientsTable", () => {
       />,
     )
 
-    const sortTrigger = document.querySelector('[data-slot="table-head"] [role="button"]') as HTMLDivElement
-
-    act(() => {
-      sortTrigger.click()
-    })
+    fireEvent.click(screen.getByRole("button", { name: /nome/i }))
 
     expect(navigationMocks.replace).toHaveBeenCalledWith("/patients?search=maria&sort_order=desc")
   })

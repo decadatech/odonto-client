@@ -1,6 +1,5 @@
 import * as React from "react"
-import { act } from "react"
-import { createRoot, type Root } from "react-dom/client"
+import { fireEvent, render, screen } from "@testing-library/react"
 
 import { BirthDatePicker } from "."
 
@@ -34,32 +33,9 @@ vi.mock("@workspace/ui/components/calendar", () => ({
   ),
 }))
 
-let container: HTMLDivElement | null = null
-let root: Root | null = null
-
-function render(element: React.ReactNode) {
-  container = document.createElement("div")
-  document.body.appendChild(container)
-  root = createRoot(container)
-
-  act(() => {
-    root?.render(element)
-  })
-}
-
-afterEach(() => {
-  act(() => {
-    root?.unmount()
-  })
-
-  container?.remove()
-  container = null
-  root = null
-})
-
 describe("BirthDatePicker", () => {
   it("should render placeholder and empty hidden input when there is no initial value", () => {
-    render(
+    const { container } = render(
       <BirthDatePicker
         id="birthDate"
         name="birthDate"
@@ -67,17 +43,17 @@ describe("BirthDatePicker", () => {
       />,
     )
 
-    expect(document.body.textContent).toContain("Selecione a data")
+    expect(screen.getByText("Selecione a data")).toBeTruthy()
 
-    const hiddenInput = document.querySelector('input[type="hidden"][name="birthDate"]') as HTMLInputElement | null
+    const hiddenInput = container.querySelector('input[type="hidden"][name="birthDate"]') as HTMLInputElement | null
 
     expect(hiddenInput?.value).toBe("")
     expect(hiddenInput?.required).toBe(true)
-    expect(document.getElementById("calendar-select-date")?.getAttribute("data-future-disabled")).toBe("true")
+    expect(screen.getByRole("button", { name: "Selecionar data" }).getAttribute("data-future-disabled")).toBe("true")
   })
 
   it("should sync the hidden input when an initial value is provided", () => {
-    render(
+    const { container } = render(
       <BirthDatePicker
         id="birthDate"
         name="birthDate"
@@ -85,17 +61,16 @@ describe("BirthDatePicker", () => {
       />,
     )
 
-    const hiddenInput = document.querySelector('input[type="hidden"][name="birthDate"]') as HTMLInputElement | null
+    const hiddenInput = container.querySelector('input[type="hidden"][name="birthDate"]') as HTMLInputElement | null
 
     expect(hiddenInput?.value).toBe("1990-05-12")
-    expect(document.body.textContent).not.toContain("Selecione a data")
-    expect(document.getElementById("calendar-select-date")?.getAttribute("data-selected")).toBe("1990-05-12")
+    expect(screen.queryByText("Selecione a data")).toBeNull()
+    expect(screen.getByRole("button", { name: "Selecionar data" }).getAttribute("data-selected")).toBe("1990-05-12")
   })
 
   it("should update the selected date and call onValueChange when a new date is selected", () => {
     const onValueChange = vi.fn()
-
-    render(
+    const { container } = render(
       <BirthDatePicker
         id="birthDate"
         name="birthDate"
@@ -103,13 +78,9 @@ describe("BirthDatePicker", () => {
       />,
     )
 
-    act(() => {
-      document.getElementById("calendar-select-date")?.dispatchEvent(
-        new MouseEvent("click", { bubbles: true }),
-      )
-    })
+    fireEvent.click(screen.getByRole("button", { name: "Selecionar data" }))
 
-    const hiddenInput = document.querySelector('input[type="hidden"][name="birthDate"]') as HTMLInputElement | null
+    const hiddenInput = container.querySelector('input[type="hidden"][name="birthDate"]') as HTMLInputElement | null
 
     expect(hiddenInput?.value).toBe("2001-02-03")
     expect(onValueChange).toHaveBeenCalledWith("2001-02-03")
