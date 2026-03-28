@@ -55,15 +55,13 @@ function PatientsTableSkeletonRows() {
       <TableCell>
         <Skeleton className="h-4 w-36" />
       </TableCell>
-      <TableActionCell
-        actions={
-          <div className="flex items-center gap-1">
-            <Skeleton className="size-9" />
-            <Skeleton className="size-9" />
-            <Skeleton className="size-9" />
-          </div>
-        }
-      />
+      <TableCell>
+        <div className="flex justify-end gap-1">
+          <Skeleton className="size-9" />
+          <Skeleton className="size-9" />
+          <Skeleton className="size-9" />
+        </div>
+      </TableCell>
     </TableRow>
   ))
 }

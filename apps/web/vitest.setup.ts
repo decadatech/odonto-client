@@ -1,1 +1,5 @@
-// Shared setup hook for web unit tests.
+import { cleanup } from "@testing-library/react"
+
+afterEach(() => {
+  cleanup()
+})
