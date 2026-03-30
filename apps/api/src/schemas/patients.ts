@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import { sortOrderSchema } from "./commons"
+
 const getPatientResponseSchema = z.object({
   id: z.uuid(),
   orgId: z.string().min(1),
@@ -52,4 +54,17 @@ export const updatePatientBodySchema = createPatientBodySchema
 
 export const updatePatientResponseSchema = getPatientResponseSchema
 
-export const listPatientsResponseSchema = z.array(getPatientResponseSchema)
+export const listPatientsSortBySchema = z.enum(["name", "created_at", "updated_at"])
+
+export const listPatientsQuerySchema = z.object({
+  cursor: z.string().trim().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  search: z.string().trim().optional(),
+  sort_by: listPatientsSortBySchema.default("name"),
+  sort_order: sortOrderSchema.default("asc"),
+})
+
+export const listPatientsResponseSchema = z.object({
+  items: z.array(getPatientResponseSchema),
+  nextCursor: z.string().nullable(),
+})

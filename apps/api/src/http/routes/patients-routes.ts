@@ -3,6 +3,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import { PatientController } from "../controllers/patient-controller/index"
 import { ensureAuthenticated } from "../middlewares/ensure-authenticated"
 import {
+  listPatientsQuerySchema,
   listPatientsResponseSchema,
   getPatientByIdParamsSchema,
   getPatientByIdResponseSchema,
@@ -21,6 +22,7 @@ export const patientsRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       preHandler: [ensureAuthenticated],
       schema: {
+        querystring: listPatientsQuerySchema,
         response: {
           200: listPatientsResponseSchema,
         },

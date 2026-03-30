@@ -1,11 +1,14 @@
 "use server"
 
+import { updateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import { auth, currentUser } from "@clerk/nextjs/server"
 import { z } from "zod"
 
 import { backendErrorSchema } from "@/schemas/api"
 import { createDomainUserPayloadSchema, domainUserSchema } from "@/schemas/users"
+
+const DENTISTS_CACHE_TAG = "dentists"
 
 type GetCurrentDomainUserResponse =
   | { exists: true; user: z.infer<typeof domainUserSchema> }
@@ -108,6 +111,7 @@ export async function createCurrentDomainUserAction(
     return { code: "COMPLETE_PROFILE_FAILED" }
   }
 
+  updateTag(DENTISTS_CACHE_TAG)
   redirect("/")
 }
 
@@ -127,7 +131,10 @@ export async function listDentistsAction(): Promise<ListDentistsResponse> {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    cache: "no-store",
+    cache: "force-cache",
+    next: {
+      tags: [DENTISTS_CACHE_TAG],
+    },
   })
 
   if (!response.ok) {

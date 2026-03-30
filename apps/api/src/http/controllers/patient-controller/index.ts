@@ -7,6 +7,7 @@ import { listPatientsUseCase } from "../../../use-cases/list-patients-use-case"
 import {
   createPatientBodySchema,
   getPatientByIdParamsSchema,
+  listPatientsQuerySchema,
   updatePatientBodySchema,
   updatePatientParamsSchema,
 } from "../../../schemas/patients"
@@ -97,7 +98,15 @@ export class PatientController {
       throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
     }
 
-    const patients = await listPatientsUseCase({ orgId })
+    const query = listPatientsQuerySchema.parse(request.query)
+    const patients = await listPatientsUseCase({
+      orgId,
+      cursor: query.cursor,
+      limit: query.limit,
+      search: query.search,
+      sortBy: query.sort_by,
+      sortOrder: query.sort_order,
+    })
 
     return reply.status(200).send(patients)
   }

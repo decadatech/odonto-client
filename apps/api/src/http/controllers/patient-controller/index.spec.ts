@@ -38,15 +38,18 @@ function createReplyMock() {
 function createRequestMock({
   body,
   params,
+  query,
   orgId,
 }: {
   body: unknown
   params?: unknown
+  query?: unknown
   orgId?: string
 }) {
   const request = {
     body,
     params,
+    query,
     requestContext: {
       get: vi.fn((key: string) => {
         if (key === "orgId") return orgId
@@ -447,59 +450,118 @@ describe("PatientController.list", () => {
   it("should call use-case and return 200", async () => {
     const request = createRequestMock({
       body: {},
+      query: {
+        cursor: "cursor_123",
+        limit: "15",
+        search: "  maria  ",
+        sort_by: "created_at",
+        sort_order: "desc",
+      },
       orgId: "org_123",
     })
     const reply = createReplyMock()
 
-    vi.mocked(listPatientsUseCase).mockResolvedValueOnce([
-      {
-        id: "deff7f0f-9684-4991-bfce-dc5da2fed3fa",
-        orgId: "org_123",
-        name: "Maria Silva",
-        sex: "female",
-        birthDate: "1990-10-10",
-        rg: "123456789",
-        cpf: "12345678901",
-        phone: "11999998888",
-        email: "maria@example.com",
-        zipCode: "01310100",
-        street: "Rua A",
-        streetNumber: "100",
-        neighborhood: "Centro",
-        city: "Sao Paulo",
-        state: "SP",
-        createdAt: "2026-03-07T10:00:00.000Z",
-        updatedAt: "2026-03-07T11:00:00.000Z",
-      },
-    ])
+    vi.mocked(listPatientsUseCase).mockResolvedValueOnce({
+      items: [
+        {
+          id: "deff7f0f-9684-4991-bfce-dc5da2fed3fa",
+          orgId: "org_123",
+          name: "Maria Silva",
+          sex: "female",
+          birthDate: "1990-10-10",
+          rg: "123456789",
+          cpf: "12345678901",
+          phone: "11999998888",
+          email: "maria@example.com",
+          zipCode: "01310100",
+          street: "Rua A",
+          streetNumber: "100",
+          neighborhood: "Centro",
+          city: "Sao Paulo",
+          state: "SP",
+          createdAt: "2026-03-07T10:00:00.000Z",
+          updatedAt: "2026-03-07T11:00:00.000Z",
+        },
+      ],
+      nextCursor: "cursor_456",
+    })
 
     await controller.list(request, reply)
 
     expect(listPatientsUseCase).toHaveBeenCalledWith({
       orgId: "org_123",
+      cursor: "cursor_123",
+      limit: 15,
+      search: "maria",
+      sortBy: "created_at",
+      sortOrder: "desc",
     })
 
     expect(reply.status).toHaveBeenCalledWith(200)
-    expect(reply.send).toHaveBeenCalledWith([
-      {
-        id: "deff7f0f-9684-4991-bfce-dc5da2fed3fa",
-        orgId: "org_123",
-        name: "Maria Silva",
-        sex: "female",
-        birthDate: "1990-10-10",
-        rg: "123456789",
-        cpf: "12345678901",
-        phone: "11999998888",
-        email: "maria@example.com",
-        zipCode: "01310100",
-        street: "Rua A",
-        streetNumber: "100",
-        neighborhood: "Centro",
-        city: "Sao Paulo",
-        state: "SP",
-        createdAt: "2026-03-07T10:00:00.000Z",
-        updatedAt: "2026-03-07T11:00:00.000Z",
+    expect(reply.send).toHaveBeenCalledWith({
+      items: [
+        {
+          id: "deff7f0f-9684-4991-bfce-dc5da2fed3fa",
+          orgId: "org_123",
+          name: "Maria Silva",
+          sex: "female",
+          birthDate: "1990-10-10",
+          rg: "123456789",
+          cpf: "12345678901",
+          phone: "11999998888",
+          email: "maria@example.com",
+          zipCode: "01310100",
+          street: "Rua A",
+          streetNumber: "100",
+          neighborhood: "Centro",
+          city: "Sao Paulo",
+          state: "SP",
+          createdAt: "2026-03-07T10:00:00.000Z",
+          updatedAt: "2026-03-07T11:00:00.000Z",
+        },
+      ],
+      nextCursor: "cursor_456",
+    })
+  })
+
+  it("should apply default pagination and sorting values", async () => {
+    const request = createRequestMock({
+      body: {},
+      query: {},
+      orgId: "org_123",
+    })
+    const reply = createReplyMock()
+
+    vi.mocked(listPatientsUseCase).mockResolvedValueOnce({
+      items: [],
+      nextCursor: null,
+    })
+
+    await controller.list(request, reply)
+
+    expect(listPatientsUseCase).toHaveBeenCalledWith({
+      orgId: "org_123",
+      cursor: undefined,
+      limit: 20,
+      search: undefined,
+      sortBy: "name",
+      sortOrder: "asc",
+    })
+  })
+
+  it("should throw when request query is invalid", async () => {
+    const request = createRequestMock({
+      body: {},
+      query: {
+        limit: "0",
+        sort_by: "invalid",
       },
-    ])
+      orgId: "org_123",
+    })
+    const reply = createReplyMock()
+
+    await expect(controller.list(request, reply)).rejects.toThrow()
+
+    expect(listPatientsUseCase).not.toHaveBeenCalled()
   })
 })
