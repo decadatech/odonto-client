@@ -1,37 +1,46 @@
 "use client"
 
-import { Suspense, use, useEffect } from "react"
+import { useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Plus } from "lucide-react"
+import type { z } from "zod"
 
 import { Button } from "@workspace/ui/components/button"
-import { PatientsTable } from "./patients-table"
-import { SearchInput } from "./search-input"
-
+import { PatientsTable } from "./components/patients-table"
+import { SearchInput } from "./components/search-input"
+import { usePatientsTableParams } from "./hooks/use-patients-table-params"
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
-import { usePatientsQuery } from "@/hooks/queries/patients"
+import { useInfinitePatientsQuery } from "@/hooks/queries/patients"
+import type { patientSchema } from "@/schemas/patients"
+import type { Patient } from "@/types/patient"
 
-import type { Pagination } from "@/types/api"
-
-interface PatientsPageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+function mapApiPatientToPatient(patient: z.infer<typeof patientSchema>): Patient {
+  return {
+    id: patient.id,
+    nome: patient.name,
+    rg: patient.rg,
+    telefone: patient.phone,
+    email: patient.email ?? "-",
+  }
 }
 
-export default function Patients({ searchParams }: PatientsPageProps) {
+export default function Patients() {
   const router = useRouter()
-  const { search, sort_order } = use(searchParams) as {
-    search: string
-    sort_order: Pagination["sort_order"]
-  }
+  const { search, sortOrder } = usePatientsTableParams()
 
   const {
-    data: patients = [],
-    isLoading,
-  } = usePatientsQuery({
+    data,
+    isPending,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfinitePatientsQuery({
     search,
-    sortOrder: sort_order,
+    sortOrder,
+    limit: 20,
   })
+  const patients = data?.pages.flatMap((page) => page.items.map(mapApiPatientToPatient)) ?? []
   const { setBreadcrumbs } = useBreadcrumbs()
 
   useEffect(() => {
@@ -60,9 +69,7 @@ export default function Patients({ searchParams }: PatientsPageProps) {
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between gap-2">
-        <Suspense>
-          <SearchInput />
-        </Suspense>
+        <SearchInput />
 
         <Button asChild>
           <Link href="/patients/new">
@@ -72,15 +79,16 @@ export default function Patients({ searchParams }: PatientsPageProps) {
         </Button>
       </div>
 
-      <Suspense>
-        <PatientsTable
-          patients={patients}
-          isLoading={isLoading}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onDetails={handleDetails}
-        />
-      </Suspense>
+      <PatientsTable
+        patients={patients}
+        isLoading={isPending}
+        hasMore={Boolean(hasNextPage)}
+        isLoadingMore={isFetchingNextPage}
+        onLoadMore={() => void fetchNextPage()}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onDetails={handleDetails}
+      />
     </div>
   )
 }

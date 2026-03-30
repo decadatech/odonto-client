@@ -1,6 +1,6 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, updateTag } from "next/cache"
 import { auth } from "@clerk/nextjs/server"
 import { z } from "zod"
 
@@ -11,13 +11,16 @@ import {
   patientPayloadSchema,
   patientSchema,
 } from "@/schemas/patients"
-import type { Patient } from "@/types/patient"
+import type { Pagination, SortOrder } from "@/types/api"
 import { onlyDigits } from "@/utils/parsers"
 
-type SortOrder = "asc" | "desc"
+const PATIENTS_CACHE_TAG = "patients"
 
 type ListPatientsInput = {
+  cursor?: string
+  limit?: number
   search?: string
+  sortBy?: Pagination["sort_by"]
   sortOrder?: SortOrder
 }
 
@@ -34,31 +37,39 @@ async function getAuthorizationHeader() {
   }
 }
 
-function normalizeSortOrder(sortOrder?: string): SortOrder {
-  return sortOrder === "desc" ? "desc" : "asc"
-}
-
-function mapApiPatientToPatient(apiPatient: ReturnType<typeof patientSchema.parse>): Patient {
-  return {
-    id: apiPatient.id,
-    nome: apiPatient.name,
-    rg: apiPatient.rg,
-    telefone: apiPatient.phone,
-    email: apiPatient.email ?? "-",
-  }
-}
-
-// REVIEW: simplify method
-export async function listPatientsAction({ search, sortOrder }: ListPatientsInput = {}) {
+export async function listPatientsAction({
+  cursor,
+  limit = 20,
+  search,
+  sortBy = "name",
+  sortOrder = "asc",
+}: ListPatientsInput = {}) {
   const headers = await getAuthorizationHeader()
+  const normalizedSearch = search?.trim() || undefined
+  const params = new URLSearchParams({
+    limit: String(limit),
+    sort_by: sortBy ?? "name",
+    sort_order: sortOrder,
+  })
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients`, {
+  if (normalizedSearch) {
+    params.set("search", normalizedSearch)
+  }
+
+  if (cursor) {
+    params.set("cursor", cursor)
+  }
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/patients?${params.toString()}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       ...headers,
     },
-    cache: "no-store",
+    cache: "force-cache",
+    next: {
+      tags: [PATIENTS_CACHE_TAG],
+    },
   })
 
   if (!response.ok) {
@@ -66,25 +77,7 @@ export async function listPatientsAction({ search, sortOrder }: ListPatientsInpu
   }
 
   const responseData = await response.json()
-  const apiPatients = listPatientsResponseSchema.parse(responseData)
-
-  const mappedPatients = apiPatients.map(mapApiPatientToPatient)
-
-  const filteredPatients = mappedPatients.filter((patient) =>
-    patient.nome.toLowerCase().includes((search ?? "").toLowerCase()),
-  )
-
-  const normalizedSortOrder = normalizeSortOrder(sortOrder)
-
-  filteredPatients.sort((a, b) => {
-    if (normalizedSortOrder === "asc") {
-      return a.nome.localeCompare(b.nome)
-    }
-
-    return b.nome.localeCompare(a.nome)
-  })
-
-  return filteredPatients
+  return listPatientsResponseSchema.parse(responseData)
 }
 
 type GetPatientByIdResponse = z.infer<typeof patientSchema> | null
@@ -188,6 +181,7 @@ export async function createPatientAction(
     }
   }
 
+  updateTag(PATIENTS_CACHE_TAG)
   revalidatePath("/patients")
   return {}
 }
@@ -258,6 +252,7 @@ export async function updatePatientAction(
     }
   }
 
+  updateTag(PATIENTS_CACHE_TAG)
   revalidatePath("/patients")
   return {}
 }

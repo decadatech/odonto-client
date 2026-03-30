@@ -1,6 +1,8 @@
+export type SortOrder = "asc" | "desc"
+
 export interface Pagination {
   sort_by?: string;
-  sort_order?: 'asc' | 'desc';
+  sort_order?: SortOrder;
   page: number;
   items_per_page: number;
   total: number;

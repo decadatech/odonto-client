@@ -1,17 +1,29 @@
-/// <reference types="vitest/globals" />
 import * as React from "react"
 import { fireEvent, render, screen } from "@testing-library/react"
 
-const navigationMocks = vi.hoisted(() => ({
-  replace: vi.fn(),
-  searchParams: new URLSearchParams(),
+import { PatientsTable } from "."
+import type { Patient } from "@/types/patient"
+
+const queryStateMocks = vi.hoisted(() => ({
+  setSortOrder: vi.fn(),
+  sortOrder: "asc" as "asc" | "desc",
+}))
+const infiniteScrollMocks = vi.hoisted(() => ({
+  useInfiniteScroll: vi.fn(),
+  ref: { current: null },
 }))
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    replace: navigationMocks.replace,
+vi.mock("../../hooks/use-patients-table-params", () => ({
+  usePatientsTableParams: () => ({
+    search: "",
+    setSearch: vi.fn(),
+    sortOrder: queryStateMocks.sortOrder,
+    setSortOrder: queryStateMocks.setSortOrder,
   }),
-  useSearchParams: () => navigationMocks.searchParams,
+}))
+
+vi.mock("@/hooks/use-infinite-scroll", () => ({
+  useInfiniteScroll: (...args: unknown[]) => infiniteScrollMocks.useInfiniteScroll(...args),
 }))
 
 vi.mock("@workspace/ui/components/tooltip", () => ({
@@ -20,8 +32,6 @@ vi.mock("@workspace/ui/components/tooltip", () => ({
   TooltipContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
-import { PatientsTable } from "@/app/(private)/patients/patients-table"
-import type { Patient } from "@/types/patient"
 
 const patients: Patient[] = [
   {
@@ -41,8 +51,10 @@ const patients: Patient[] = [
 ]
 
 beforeEach(() => {
-  navigationMocks.replace.mockClear()
-  navigationMocks.searchParams = new URLSearchParams()
+  queryStateMocks.setSortOrder.mockClear()
+  queryStateMocks.sortOrder = "asc"
+  infiniteScrollMocks.useInfiniteScroll.mockReset()
+  infiniteScrollMocks.useInfiniteScroll.mockReturnValue(infiniteScrollMocks.ref)
 })
 
 describe("PatientsTable", () => {
@@ -51,6 +63,8 @@ describe("PatientsTable", () => {
       <PatientsTable
         patients={[]}
         isLoading
+        hasMore={false}
+        isLoadingMore={false}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onDetails={vi.fn()}
@@ -66,6 +80,8 @@ describe("PatientsTable", () => {
       <PatientsTable
         patients={[]}
         isLoading={false}
+        hasMore={false}
+        isLoadingMore={false}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onDetails={vi.fn()}
@@ -84,6 +100,8 @@ describe("PatientsTable", () => {
       <PatientsTable
         patients={patients}
         isLoading={false}
+        hasMore={false}
+        isLoadingMore={false}
         onEdit={onEdit}
         onDelete={onDelete}
         onDetails={onDetails}
@@ -112,12 +130,14 @@ describe("PatientsTable", () => {
   })
 
   it("should update the sort order in the url when sorting by name", () => {
-    navigationMocks.searchParams = new URLSearchParams("search=maria&sort_order=asc")
+    queryStateMocks.sortOrder = "asc"
 
     render(
       <PatientsTable
         patients={patients}
         isLoading={false}
+        hasMore={false}
+        isLoadingMore={false}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
         onDetails={vi.fn()}
@@ -126,6 +146,42 @@ describe("PatientsTable", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /nome/i }))
 
-    expect(navigationMocks.replace).toHaveBeenCalledWith("/patients?search=maria&sort_order=desc")
+    expect(queryStateMocks.setSortOrder).toHaveBeenCalledWith("desc")
+  })
+
+  it("should configure infinite scroll when there are more patients to load", () => {
+    const onLoadMore = vi.fn()
+
+    render(
+      <PatientsTable
+        patients={patients}
+        isLoading={false}
+        hasMore
+        isLoadingMore={false}
+        onLoadMore={onLoadMore}
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+        onDetails={vi.fn()}
+      />,
+    )
+
+    expect(infiniteScrollMocks.useInfiniteScroll).toHaveBeenCalled()
+    expect(screen.getByTestId("patients-load-more-trigger").textContent).toContain("Role para carregar mais pacientes")
+  })
+
+  it("should show the loading-more state while fetching the next page", () => {
+    render(
+      <PatientsTable
+        patients={patients}
+        isLoading={false}
+        hasMore
+        isLoadingMore
+        onEdit={vi.fn()}
+        onDelete={vi.fn()}
+        onDetails={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId("patients-load-more-trigger").textContent).toContain("Carregando mais pacientes...")
   })
 })

@@ -66,7 +66,7 @@ export function ScheduleFacetedFilters({
   const patientOptions = React.useMemo<FacetFilterOption[]>(
     () => patientsPage?.items.map((patient) => ({
       value: patient.id,
-      label: patient.nome,
+      label: patient.name,
     })) ?? [],
     [patientsPage],
   )

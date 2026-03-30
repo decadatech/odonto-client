@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useSearchParams, useRouter } from "next/navigation"
 import { Pencil, Eye, Trash } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
@@ -18,14 +17,17 @@ import {
   TableCaption,
 } from "@workspace/ui/components/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip"
-
 import { formatRG, formatPhoneNumber } from "@/utils/formatters"
-
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll"
+import { usePatientsTableParams } from "../../hooks/use-patients-table-params"
 import { type Patient } from "@/types/patient"
 
 interface PatientsTableProps {
   patients: Patient[]
   isLoading: boolean
+  hasMore?: boolean
+  isLoadingMore?: boolean
+  onLoadMore?: () => void
   onEdit: (id: string) => void
   onDelete: (id: string) => void
   onDetails: (id: string) => void
@@ -119,24 +121,26 @@ function TableActions({ onEdit, onDelete, onDetails }: TableActionsProps) {
 export function PatientsTable({
   patients,
   isLoading,
+  hasMore = false,
+  isLoadingMore = false,
+  onLoadMore,
   onEdit,
   onDelete,
   onDetails,
 }: PatientsTableProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams();
+  const { sortOrder, setSortOrder } = usePatientsTableParams()
+  const loadMoreRef = useInfiniteScroll(
+    () => {
+      if (onLoadMore) {
+        onLoadMore()
+      }
+    },
+    hasMore && !isLoading && !isLoadingMore,
+  )
 
-  const handleSort = (value: 'asc' | 'desc') => {
-    const params = new URLSearchParams(searchParams)
-    if (value) {
-      params.set('sort_order', value)
-    } else {
-      params.delete('sort_order')
-    }
-    router.replace(`/patients?${params.toString()}`)
+  const handleSort = (value: "asc" | "desc") => {
+    void setSortOrder(value)
   }
-
-  const sortOrder = (searchParams.get('sort_order') ?? 'asc') as 'asc' | 'desc';
 
   return (
     <div className="rounded-md border">
@@ -188,8 +192,24 @@ export function PatientsTable({
               />
             </TableRow>
           ))}
+
+          {!isLoading && patients.length > 0 && (hasMore || isLoadingMore) && (
+            <TableRow>
+              <TableCell colSpan={5} className="py-4">
+                <div
+                  ref={loadMoreRef}
+                  data-testid="patients-load-more-trigger"
+                  className="flex min-h-10 items-center justify-center text-sm text-muted-foreground"
+                >
+                  {isLoadingMore
+                    ? "Carregando mais pacientes..."
+                    : "Role para carregar mais pacientes"}
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
   )
-} 
+}

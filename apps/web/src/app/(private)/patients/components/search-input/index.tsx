@@ -1,38 +1,30 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { X } from "lucide-react"
 
 import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
-
 import { useDebounce } from "@/hooks/use-debounce"
+import { usePatientsTableParams } from "../../hooks/use-patients-table-params"
 
 export function SearchInput() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [searchValue, setSearchValue] = useState(searchParams.get('search') || '')
+  const { search, setSearch } = usePatientsTableParams()
+  const [searchValue, setSearchValue] = useState(search)
 
   const debouncedSearch = useDebounce(searchValue, 250)
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams)
-    if (debouncedSearch) {
-      params.set('search', debouncedSearch)
-    } else {
-      params.delete('search')
-    }
-
-    const currentQuery = searchParams.toString()
-    const nextQuery = params.toString()
-
-    if (currentQuery === nextQuery) {
+    if (debouncedSearch === search) {
       return
     }
 
-    router.replace(nextQuery ? `/patients?${nextQuery}` : '/patients')
-  }, [debouncedSearch, router, searchParams])
+    void setSearch(debouncedSearch)
+  }, [debouncedSearch, search, setSearch])
+
+  useEffect(() => {
+    setSearchValue(search)
+  }, [search])
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
