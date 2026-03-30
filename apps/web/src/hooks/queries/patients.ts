@@ -1,25 +1,37 @@
 import { useQuery } from "@tanstack/react-query"
 
-import { listPatientsAction } from "@/app/actions/patients"
+import { listPatientsPageAction } from "@/app/actions/patients"
 
 type SortOrder = "asc" | "desc"
+
+type ListPatientsPageResult = Awaited<ReturnType<typeof listPatientsPageAction>>
 
 interface UsePatientsQueryOptions {
   sortOrder?: SortOrder
   search?: string
+  limit?: number
 }
 
-export function getPatientsQueryKey({ search, sortOrder }: UsePatientsQueryOptions = {}) {
-  return ["patients", { search: search ?? "", sortOrder: sortOrder ?? "asc" }] as const
+function getPatientsQueryKey({
+  search,
+  sortOrder,
+  limit,
+}: UsePatientsQueryOptions = {}) {
+  return ["patients", { search: search ?? "", sortOrder: sortOrder ?? "asc", limit: limit ?? 20 }] as const
 }
 
-export function usePatientsQuery({ search, sortOrder }: UsePatientsQueryOptions = {}) {
-  return useQuery({
-    queryKey: getPatientsQueryKey({ search, sortOrder }),
+export function usePatientsQuery({
+  search,
+  sortOrder,
+  limit = 20,
+}: UsePatientsQueryOptions = {}) {
+  return useQuery<ListPatientsPageResult>({
+    queryKey: getPatientsQueryKey({ search, sortOrder, limit }),
     queryFn: () =>
-      listPatientsAction({
+      listPatientsPageAction({
         search,
         sortOrder,
+        limit,
       }),
   })
 }
