@@ -33,12 +33,12 @@ interface FacetFilterProps {
   loadingMessage?: string
 }
 
-function getSelectionSummary(selectedOptions: FacetFilterOption[]) {
-  if (selectedOptions.length <= 2) {
+function getSelectionSummary(selectedOptions: FacetFilterOption[], selectedCount: number) {
+  if (selectedOptions.length === selectedCount && selectedOptions.length <= 2) {
     return selectedOptions.map((option) => option.label)
   }
 
-  return [`${selectedOptions.length} selecionados`]
+  return [`${selectedCount} selecionado${selectedCount === 1 ? "" : "s"}`]
 }
 
 export function FacetFilter({
@@ -58,7 +58,8 @@ export function FacetFilter({
   const selectedOptions = (allOptions ?? options).filter((option) =>
     selectedValues.includes(option.value),
   )
-  const selectionSummary = getSelectionSummary(selectedOptions)
+  const selectedCount = selectedValues.length
+  const selectionSummary = getSelectionSummary(selectedOptions, selectedCount)
   const isSearchEnabled = typeof onSearchChange === "function"
 
   return (
@@ -66,11 +67,11 @@ export function FacetFilter({
       <PopoverTrigger asChild>
         <Button type="button" variant="outline" className="h-9 border-dashed">
           <span>{title}</span>
-          {selectedOptions.length > 0 ? (
+          {selectedCount > 0 ? (
             <>
               <span className="hidden h-4 w-px bg-border sm:block" />
               <Badge variant="secondary" className="rounded-sm px-1 font-normal sm:hidden">
-                {selectedOptions.length}
+                {selectedCount}
               </Badge>
               <div className="hidden items-center gap-1 sm:flex">
                 {selectionSummary.map((label) => (
@@ -150,7 +151,7 @@ export function FacetFilter({
 
         <div className="flex items-center justify-between border-t px-3 py-2">
           <span className="text-xs text-muted-foreground">
-            {selectedOptions.length} selecionado{selectedOptions.length === 1 ? "" : "s"}
+            {selectedCount} selecionado{selectedCount === 1 ? "" : "s"}
           </span>
           <Button
             type="button"
@@ -158,7 +159,7 @@ export function FacetFilter({
             size="sm"
             className="h-8 px-2"
             onClick={onReset}
-            disabled={selectedOptions.length === 0}
+            disabled={selectedCount === 0}
           >
             Limpar
           </Button>

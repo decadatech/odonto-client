@@ -141,4 +141,20 @@ describe("FacetFilter", () => {
 
     expect(screen.getByText("0 selecionados")).toBeTruthy()
   })
+
+  it("should show selected count even when selected labels are not loaded", () => {
+    render(
+      <FacetFilter
+        title="Pacientes"
+        options={PATIENT_OPTIONS.slice(0, 1)}
+        allOptions={PATIENT_OPTIONS.slice(0, 1)}
+        selectedValues={["patient-1", "patient-2"]}
+        onToggle={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    expect(screen.getAllByText("2 selecionados").length).toBeGreaterThan(0)
+    expect(screen.getByRole("button", { name: "Limpar" }).getAttribute("disabled")).toBeNull()
+  })
 })
