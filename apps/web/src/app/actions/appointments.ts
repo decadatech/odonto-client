@@ -15,12 +15,15 @@ import {
 type ListAppointmentsResponse = z.infer<typeof listAppointmentsResponseSchema>
 
 type ListAppointmentsActionInput = {
+  from?: string
+  to?: string
   patientIds?: string[]
   dentistUserIds?: string[]
 }
 
-// TODO: time frame filter
 export async function listAppointmentsAction({
+  from,
+  to,
   patientIds,
   dentistUserIds,
 }: ListAppointmentsActionInput = {}): Promise<ListAppointmentsResponse> {
@@ -32,6 +35,11 @@ export async function listAppointmentsAction({
   }
 
   const params = new URLSearchParams()
+
+  if (from && to) {
+    params.set("from", from)
+    params.set("to", to)
+  }
 
   if (patientIds && patientIds.length > 0) {
     params.set("patient_ids", patientIds.join(","))

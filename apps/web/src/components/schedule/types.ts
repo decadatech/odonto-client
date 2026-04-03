@@ -1,5 +1,11 @@
 export type ScheduleAppointmentStatus = "scheduled" | "confirmed" | "cancelled"
 export type ScheduleAppointmentColor = "teal" | "amber" | "rose" | "violet" | "sky"
+export type ScheduleView = "month" | "week" | "day"
+
+export interface ScheduleTimeframe {
+  from: Date
+  to: Date
+}
 
 export interface ScheduleDentistOption {
   id: string
@@ -25,6 +31,11 @@ export interface ScheduleAppointment {
   status?: ScheduleAppointmentStatus
 }
 
+export interface ScheduleAppointmentDraft {
+  start: Date
+  end: Date
+}
+
 export interface CreateScheduleAppointmentInput {
   patientId: string
   title: string
@@ -40,10 +51,12 @@ export interface CreateScheduleAppointmentInput {
 export interface ScheduleProps {
   appointments: ScheduleAppointment[]
   initialDate?: Date
+  initialView?: ScheduleView
   startHour?: number
   endHour?: number
   intervalMinutes?: number
-  onCreateAppointment?: () => void
+  onCreateAppointment?: (draft?: ScheduleAppointmentDraft) => void
   onAppointmentClick?: (appointment: ScheduleAppointment) => void
   onAppointmentMove?: (appointmentId: string, start: Date, end: Date) => void
+  onTimeframeChange?: (timeframe: ScheduleTimeframe) => void
 }

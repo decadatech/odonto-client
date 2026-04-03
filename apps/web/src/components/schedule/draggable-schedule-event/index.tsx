@@ -28,6 +28,7 @@ interface DraggableScheduleEventProps {
   minimumHeight: number
   onAppointmentClick?: (appointment: ScheduleAppointment) => void
   onAppointmentMove?: (appointmentId: string, start: Date, end: Date) => void
+  onInteractionEnd?: () => void
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -49,6 +50,7 @@ export function DraggableScheduleEvent({
   minimumHeight,
   onAppointmentClick,
   onAppointmentMove,
+  onInteractionEnd,
 }: DraggableScheduleEventProps) {
   const containerRef = dayColumnRefs[dayIndex]
   const eventElementRef = useRef<HTMLDivElement | null>(null)
@@ -130,6 +132,7 @@ export function DraggableScheduleEvent({
   const onDragEnd = (_event: PointerEvent, info: PanInfo) => {
     setIsDragging(false)
     setIsInteracting(false)
+    onInteractionEnd?.()
 
     if (!onAppointmentMove) {
       return
@@ -203,11 +206,13 @@ export function DraggableScheduleEvent({
     onTopResizeEnd: () => {
       setIsResizing(false)
       setIsInteracting(false)
+      onInteractionEnd?.()
       commitResize()
     },
     onBottomResizeEnd: () => {
       setIsResizing(false)
       setIsInteracting(false)
+      onInteractionEnd?.()
       commitResize()
     },
   })

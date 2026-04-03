@@ -106,6 +106,7 @@ export function ScheduleEventCard({
   const eventButton = (
     <button
       type="button"
+      data-schedule-event=""
       onClick={() => onClick?.(appointment)}
       onPointerDownCapture={onPointerDownCapture}
       onPointerUpCapture={onPointerUpCapture}

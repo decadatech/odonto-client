@@ -16,13 +16,13 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@workspace/ui/components/sheet"
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@workspace/ui/components/drawer"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { toast } from "@workspace/ui/components/sonner"
 import { Textarea } from "@workspace/ui/components/textarea"
@@ -30,6 +30,7 @@ import { createAppointmentAction } from "@/app/actions/appointments"
 import { DatePicker } from "@/components/date-picker"
 import type {
   ScheduleAppointment,
+  ScheduleAppointmentDraft,
   ScheduleDentistOption,
   SchedulePatientOption,
 } from "@/components/schedule/types"
@@ -110,6 +111,7 @@ interface CreateAppointmentSheetProps {
   onOpenChange: (open: boolean) => void
   dentists: ScheduleDentistOption[]
   patients: SchedulePatientOption[]
+  initialDraft?: ScheduleAppointmentDraft | null
   onCreateAppointment: (appointment: ScheduleAppointment) => void
 }
 
@@ -126,13 +128,17 @@ type CreateAppointmentFormValues = {
 function getDefaultValues(
   dentists: ScheduleDentistOption[],
   patients: SchedulePatientOption[],
+  initialDraft?: ScheduleAppointmentDraft | null,
 ): CreateAppointmentFormValues {
+  const initialStart = initialDraft?.start ?? new Date()
+  const initialEnd = initialDraft?.end ?? new Date(initialStart.getTime() + 30 * 60 * 1000)
+
   return {
     title: "",
     description: "",
-    startDate: format(new Date(), "yyyy-MM-dd"),
-    startTime: "09:00",
-    endTime: "09:30",
+    startDate: format(initialStart, "yyyy-MM-dd"),
+    startTime: format(initialStart, "HH:mm"),
+    endTime: format(initialEnd, "HH:mm"),
     dentistId: "",
     patientId: "",
   }
@@ -143,12 +149,13 @@ export function CreateAppointmentSheet({
   onOpenChange,
   dentists,
   patients,
+  initialDraft,
   onCreateAppointment,
 }: CreateAppointmentSheetProps) {
   const [state, formAction, pending] = useActionState(createAppointmentAction, {})
   const form = useForm<CreateAppointmentFormValues>({
     mode: "onChange",
-    defaultValues: getDefaultValues(dentists, patients),
+    defaultValues: getDefaultValues(dentists, patients, initialDraft),
   })
   const lastHandledAppointmentIdRef = useRef<string | null>(null)
 
@@ -223,8 +230,16 @@ export function CreateAppointmentSheet({
   }, [onCreateAppointment, selectedDentist, selectedPatient, state?.appointment])
 
   function resetForm() {
-    form.reset(getDefaultValues(dentists, patients))
+    form.reset(getDefaultValues(dentists, patients, initialDraft))
   }
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    form.reset(getDefaultValues(dentists, patients, initialDraft))
+  }, [dentists, form, initialDraft, open, patients])
 
   function handleOpenChange(nextOpen: boolean) {
     onOpenChange(nextOpen)
@@ -264,17 +279,17 @@ export function CreateAppointmentSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" className="flex h-full flex-col sm:max-w-md">
+    <Drawer open={open} onOpenChange={handleOpenChange} direction="right">
+      <DrawerContent className="flex h-full flex-col sm:max-w-md">
         <form className="flex h-full flex-col" onSubmit={form.handleSubmit(handleSubmit)}>
-          <SheetHeader>
-            <SheetTitle className="text-2xl font-semibold tracking-tight text-foreground">
+          <DrawerHeader>
+            <DrawerTitle className="text-2xl font-semibold tracking-tight text-foreground">
               Criar um novo atendimento
-            </SheetTitle>
-            <SheetDescription className="sr-only">
+            </DrawerTitle>
+            <DrawerDescription className="sr-only">
               Preencha os dados para criar um novo agendamento entre paciente e dentista.
-            </SheetDescription>
-          </SheetHeader>
+            </DrawerDescription>
+          </DrawerHeader>
 
           <div className="flex-1 overflow-auto px-4">
             <div className="space-y-6 pb-6">
@@ -417,7 +432,7 @@ export function CreateAppointmentSheet({
             </div>
           </div>
 
-          <SheetFooter className="mt-auto flex-col gap-2 border-t bg-background pt-4 sm:flex-col">
+          <DrawerFooter className="mt-auto flex-col gap-2 border-t bg-background pt-4 sm:flex-col">
             <Button type="submit" className="w-full" disabled={pending || !form.formState.isValid}>
               <span className="inline-flex size-4 items-center justify-center">
                 {pending ? <Spinner data-icon="inline-start" /> : null}
@@ -433,9 +448,9 @@ export function CreateAppointmentSheet({
             >
               Cancelar
             </Button>
-          </SheetFooter>
+          </DrawerFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   )
 }

@@ -1,12 +1,13 @@
 "use client"
 
 import { addMinutes, differenceInMinutes, format, startOfDay } from "date-fns"
-import { createRef, useMemo } from "react"
+import { ptBR } from "date-fns/locale"
+import { createRef, useMemo, useRef } from "react"
 
 import { cn } from "@workspace/ui/lib/utils"
 
 import { DraggableScheduleEvent } from "@/components/schedule/draggable-schedule-event"
-import type { ScheduleAppointment } from "@/components/schedule/types"
+import type { ScheduleAppointment, ScheduleAppointmentDraft } from "@/components/schedule/types"
 import { ScheduleEventCard } from "@/components/schedule/schedule-event-card"
 import { getAppointmentsForDay, toDate } from "@/components/schedule/utils"
 
@@ -15,7 +16,9 @@ interface ScheduleGridProps {
   appointments: ScheduleAppointment[]
   timeSlots: Date[]
   startHour: number
+  endHour: number
   intervalMinutes: number
+  onCreateAppointment?: (draft: ScheduleAppointmentDraft) => void
   onAppointmentClick?: (appointment: ScheduleAppointment) => void
   onAppointmentMove?: (appointmentId: string, start: Date, end: Date) => void
 }
@@ -29,10 +32,15 @@ export function ScheduleGrid({
   appointments,
   timeSlots,
   startHour,
+  endHour,
   intervalMinutes,
+  onCreateAppointment,
   onAppointmentClick,
   onAppointmentMove,
 }: ScheduleGridProps) {
+  const lastInteractionAtRef = useRef(0)
+  const suppressNextEmptyClickRef = useRef(false)
+  const dayColumns = days.length
   const minutesPerPixel = intervalMinutes / SLOT_HEIGHT
   const pixelsPerMinute = SLOT_HEIGHT / intervalMinutes
   const snapHeight = SNAP_MINUTES * pixelsPerMinute
@@ -45,11 +53,17 @@ export function ScheduleGrid({
 
   return (
     <div className="overflow-auto">
-      <div className="grid min-w-[980px] grid-cols-[80px_repeat(7,minmax(0,1fr))]">
+      <div
+        className="grid"
+        style={{
+          minWidth: dayColumns === 1 ? 380 : 980,
+          gridTemplateColumns: `80px repeat(${dayColumns}, minmax(0, 1fr))`,
+        }}
+      >
         <div className="border-r border-b bg-muted/30" />
         {days.map((day) => (
           <div key={day.toISOString()} className="border-b p-2 text-center">
-            <p className="text-xs text-muted-foreground">{format(day, "EEE")}</p>
+            <p className="text-xs text-muted-foreground">{format(day, "EEE", { locale: ptBR })}</p>
             <p className="text-sm font-semibold">{format(day, "dd/MM")}</p>
           </div>
         ))}
@@ -89,6 +103,45 @@ export function ScheduleGrid({
               key={day.toISOString()}
               ref={dayColumnRefs[dayIndex]}
               className="relative overflow-hidden border-r last:border-r-0"
+              onClick={(event) => {
+                if (!onCreateAppointment) {
+                  return
+                }
+
+                if (suppressNextEmptyClickRef.current) {
+                  suppressNextEmptyClickRef.current = false
+                  return
+                }
+
+                if (Date.now() - lastInteractionAtRef.current < 500) {
+                  return
+                }
+
+                const target = event.target as HTMLElement
+
+                if (target.closest("[data-schedule-event]")) {
+                  return
+                }
+
+                const rect = event.currentTarget.getBoundingClientRect()
+                const clickY = event.clientY - rect.top
+                const snappedY = Math.max(
+                  0,
+                  Math.round(clickY / snapHeight) * snapHeight,
+                )
+                const maximumStartMinutes = Math.max((endHour - startHour) * 60 - 30, 0)
+
+                const draftStart = startOfDay(day)
+                draftStart.setHours(startHour, 0, 0, 0)
+
+                const start = addMinutes(
+                  draftStart,
+                  Math.min(snappedY / pixelsPerMinute, maximumStartMinutes),
+                )
+                const end = addMinutes(start, 30)
+
+                onCreateAppointment({ start, end })
+              }}
             >
               {timeSlots.map((slot) => (
                 <div key={slot.toISOString()} className="border-b" style={{ height: SLOT_HEIGHT }} />
@@ -124,6 +177,10 @@ export function ScheduleGrid({
                     minimumHeight={minimumHeight}
                     onAppointmentClick={onAppointmentClick}
                     onAppointmentMove={onAppointmentMove}
+                    onInteractionEnd={() => {
+                      lastInteractionAtRef.current = Date.now()
+                      suppressNextEmptyClickRef.current = true
+                    }}
                   />
                 )
               })}
