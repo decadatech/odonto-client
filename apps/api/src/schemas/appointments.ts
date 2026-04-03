@@ -23,6 +23,25 @@ const appointmentResponseSchema = z.object({
   updatedAt: z.iso.datetime(),
 })
 
+function normalizeUuidListFilter(value: string | string[] | undefined) {
+  if (!value) {
+    return undefined
+  }
+
+  const rawValues = Array.isArray(value) ? value : [value]
+
+  const ids = rawValues
+    .flatMap((item) => item.split(","))
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  if (ids.length === 0) {
+    return undefined
+  }
+
+  return [...new Set(ids.map((id) => z.uuid().parse(id)))]
+}
+
 export const getAppointmentByIdParamsSchema = z.object({
   appointment_id: z.uuid(),
 })
@@ -30,6 +49,17 @@ export const getAppointmentByIdParamsSchema = z.object({
 export const getAppointmentByIdResponseSchema = appointmentResponseSchema.extend({
   patient: appointmentPatientSchema,
   dentist: appointmentDentistSchema,
+})
+
+export const listAppointmentsQuerySchema = z.object({
+  patient_ids: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform(normalizeUuidListFilter),
+  dentist_user_ids: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform(normalizeUuidListFilter),
 })
 
 export const listAppointmentsResponseSchema = z.array(getAppointmentByIdResponseSchema)

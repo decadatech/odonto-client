@@ -87,4 +87,20 @@ describe("listAppointmentsUseCase", () => {
 
     expect(output).toEqual([])
   })
+
+  it("should apply patient and dentist filters when ids are provided", async () => {
+    selectWhereMock.mockResolvedValueOnce([])
+
+    await listAppointmentsUseCase({
+      ...input,
+      patientIds: [
+        "30e87f1c-a387-4ccd-9904-6980dd8eef2f",
+      ],
+      dentistUserIds: [
+        "0fa67a3f-f95e-4bb6-a788-4d4329b9fd75",
+      ],
+    })
+
+    expect(selectWhereMock).toHaveBeenCalledTimes(1)
+  })
 })

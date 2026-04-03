@@ -20,8 +20,15 @@ function createReplyMock() {
   }
 }
 
-function createRequestMock({ orgId }: { orgId?: string }) {
+function createRequestMock({
+  orgId,
+  query,
+}: {
+  orgId?: string
+  query?: Record<string, unknown>
+}) {
   const request = {
+    query,
     requestContext: {
       get: vi.fn((key: string) => {
         if (key === "orgId") return orgId
@@ -49,7 +56,7 @@ describe("AppointmentController.list", () => {
   })
 
   it("should throw UNAUTHENTICATED when orgId is missing", async () => {
-    const request = createRequestMock({ orgId: undefined })
+    const request = createRequestMock({ orgId: undefined, query: {} })
     const reply = createReplyMock()
 
     await expect(controller.list(request, reply)).rejects.toEqual(
@@ -63,7 +70,7 @@ describe("AppointmentController.list", () => {
   })
 
   it("should call use-case and return 200", async () => {
-    const request = createRequestMock({ orgId: "org_123" })
+    const request = createRequestMock({ orgId: "org_123", query: {} })
     const reply = createReplyMock()
 
     vi.mocked(listAppointmentsUseCase).mockResolvedValueOnce([
@@ -93,6 +100,8 @@ describe("AppointmentController.list", () => {
 
     expect(listAppointmentsUseCase).toHaveBeenCalledWith({
       orgId: "org_123",
+      patientIds: undefined,
+      dentistUserIds: undefined,
     })
     expect(reply.status).toHaveBeenCalledWith(200)
     expect(reply.send).toHaveBeenCalledWith([
@@ -117,5 +126,29 @@ describe("AppointmentController.list", () => {
         updatedAt: "2026-03-13T09:00:00.000Z",
       },
     ])
+  })
+
+  it("should parse comma-separated patient and dentist ids from query", async () => {
+    const request = createRequestMock({
+      orgId: "org_123",
+      query: {
+        patient_ids: "30e87f1c-a387-4ccd-9904-6980dd8eef2f,4c5d96ee-d4b9-4a5c-bb7f-c1774ba4d09d",
+        dentist_user_ids: "0fa67a3f-f95e-4bb6-a788-4d4329b9fd75",
+      },
+    })
+    const reply = createReplyMock()
+
+    vi.mocked(listAppointmentsUseCase).mockResolvedValueOnce([])
+
+    await controller.list(request, reply)
+
+    expect(listAppointmentsUseCase).toHaveBeenCalledWith({
+      orgId: "org_123",
+      patientIds: [
+        "30e87f1c-a387-4ccd-9904-6980dd8eef2f",
+        "4c5d96ee-d4b9-4a5c-bb7f-c1774ba4d09d",
+      ],
+      dentistUserIds: ["0fa67a3f-f95e-4bb6-a788-4d4329b9fd75"],
+    })
   })
 })

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm"
+import { and, eq, inArray } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "../../db"
@@ -7,9 +7,25 @@ import { listAppointmentsResponseSchema } from "../../schemas/appointments"
 
 export type ListAppointmentsUseCaseInput = {
   orgId: string
+  patientIds?: string[]
+  dentistUserIds?: string[]
 }
 
 export type ListAppointmentsUseCaseOutput = z.infer<typeof listAppointmentsResponseSchema>
+
+function buildFilters(input: ListAppointmentsUseCaseInput) {
+  const filters = [eq(appointments.orgId, input.orgId)]
+
+  if (input.patientIds && input.patientIds.length > 0) {
+    filters.push(inArray(appointments.patientId, input.patientIds))
+  }
+
+  if (input.dentistUserIds && input.dentistUserIds.length > 0) {
+    filters.push(inArray(appointments.dentistUserId, input.dentistUserIds))
+  }
+
+  return filters
+}
 
 export async function listAppointmentsUseCase(
   input: ListAppointmentsUseCaseInput,
@@ -35,7 +51,7 @@ export async function listAppointmentsUseCase(
       users,
       eq(appointments.dentistUserId, users.id),
     )
-    .where(eq(appointments.orgId, input.orgId))
+    .where(and(...buildFilters(input)))
 
   return result.map((row) => ({
     ...row.appointment,

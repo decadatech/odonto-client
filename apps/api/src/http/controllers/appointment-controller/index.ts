@@ -7,6 +7,7 @@ import { updateAppointmentUseCase } from "../../../use-cases/update-appointment-
 import {
   createAppointmentBodySchema,
   getAppointmentByIdParamsSchema,
+  listAppointmentsQuerySchema,
   updateAppointmentBodySchema,
   updateAppointmentParamsSchema,
 } from "../../../schemas/appointments"
@@ -23,7 +24,13 @@ export class AppointmentController {
       throw new AppError(401, "UNAUTHENTICATED", "Unauthenticated request")
     }
 
-    const appointments = await listAppointmentsUseCase({ orgId })
+    const query = listAppointmentsQuerySchema.parse(request.query)
+
+    const appointments = await listAppointmentsUseCase({
+      orgId,
+      patientIds: query.patient_ids,
+      dentistUserIds: query.dentist_user_ids,
+    })
 
     return reply.status(200).send(appointments)
   }

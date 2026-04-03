@@ -7,6 +7,7 @@ import {
   createAppointmentResponseSchema,
   getAppointmentByIdParamsSchema,
   getAppointmentByIdResponseSchema,
+  listAppointmentsQuerySchema,
   listAppointmentsResponseSchema,
   updateAppointmentBodySchema,
   updateAppointmentParamsSchema,
@@ -21,6 +22,7 @@ export const appointmentsRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       preHandler: [ensureAuthenticated],
       schema: {
+        querystring: listAppointmentsQuerySchema,
         response: {
           200: listAppointmentsResponseSchema,
         },
