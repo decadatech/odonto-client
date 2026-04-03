@@ -22,7 +22,10 @@ export const patientSchema = z.object({
   state: z.string().min(2),
 })
 
-export const listPatientsResponseSchema = z.array(patientSchema)
+export const listPatientsResponseSchema = z.object({
+  items: z.array(patientSchema),
+  nextCursor: z.string().nullable(),
+})
 
 export const patientFormSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(240, "Nome deve ter no máximo 240 caracteres."),

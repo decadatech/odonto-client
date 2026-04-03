@@ -6,7 +6,9 @@ import {
 } from "."
 
 const selectWhereMock = vi.hoisted(() => vi.fn())
-const selectInnerJoinSecondMock = vi.hoisted(() => vi.fn(() => ({ where: selectWhereMock })))
+const selectOrderByMock = vi.hoisted(() => vi.fn())
+const selectWhereResult = vi.hoisted(() => ({ orderBy: selectOrderByMock }))
+const selectInnerJoinSecondMock = vi.hoisted(() => vi.fn(() => ({ where: vi.fn(() => selectWhereResult) })))
 const selectInnerJoinFirstMock = vi.hoisted(() => vi.fn(() => ({ innerJoin: selectInnerJoinSecondMock })))
 const selectFromMock = vi.hoisted(() => vi.fn(() => ({ innerJoin: selectInnerJoinFirstMock })))
 const selectMock = vi.hoisted(() => vi.fn(() => ({ from: selectFromMock })))
@@ -20,16 +22,19 @@ vi.mock("../../db", () => ({
 describe("listAppointmentsUseCase", () => {
   const input: ListAppointmentsUseCaseInput = {
     orgId: "org_123",
+    from: "2026-03-13T00:00:00.000Z",
+    to: "2026-03-14T00:00:00.000Z",
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
+    selectOrderByMock.mockReset()
   })
 
   it("should return appointments with patient and dentist relationships", async () => {
     const now = new Date("2026-03-13T09:00:00.000Z")
 
-    selectWhereMock.mockResolvedValueOnce([
+    selectOrderByMock.mockResolvedValueOnce([
       {
         appointment: {
           id: "6e4687ae-6471-4a2a-b161-24984924b125",
@@ -81,7 +86,7 @@ describe("listAppointmentsUseCase", () => {
   })
 
   it("should return an empty array when no appointments are found", async () => {
-    selectWhereMock.mockResolvedValueOnce([])
+    selectOrderByMock.mockResolvedValueOnce([])
 
     const output = await listAppointmentsUseCase(input)
 
@@ -89,7 +94,7 @@ describe("listAppointmentsUseCase", () => {
   })
 
   it("should apply patient and dentist filters when ids are provided", async () => {
-    selectWhereMock.mockResolvedValueOnce([])
+    selectOrderByMock.mockResolvedValueOnce([])
 
     await listAppointmentsUseCase({
       ...input,
@@ -101,6 +106,6 @@ describe("listAppointmentsUseCase", () => {
       ],
     })
 
-    expect(selectWhereMock).toHaveBeenCalledTimes(1)
+    expect(selectOrderByMock).toHaveBeenCalledTimes(1)
   })
 })

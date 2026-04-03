@@ -56,7 +56,13 @@ describe("AppointmentController.list", () => {
   })
 
   it("should throw UNAUTHENTICATED when orgId is missing", async () => {
-    const request = createRequestMock({ orgId: undefined, query: {} })
+    const request = createRequestMock({
+      orgId: undefined,
+      query: {
+        from: "2026-03-13T00:00:00.000Z",
+        to: "2026-03-14T00:00:00.000Z",
+      },
+    })
     const reply = createReplyMock()
 
     await expect(controller.list(request, reply)).rejects.toEqual(
@@ -70,7 +76,10 @@ describe("AppointmentController.list", () => {
   })
 
   it("should call use-case and return 200", async () => {
-    const request = createRequestMock({ orgId: "org_123", query: {} })
+    const request = createRequestMock({
+      orgId: "org_123",
+      query: {},
+    })
     const reply = createReplyMock()
 
     vi.mocked(listAppointmentsUseCase).mockResolvedValueOnce([
@@ -100,6 +109,8 @@ describe("AppointmentController.list", () => {
 
     expect(listAppointmentsUseCase).toHaveBeenCalledWith({
       orgId: "org_123",
+      from: undefined,
+      to: undefined,
       patientIds: undefined,
       dentistUserIds: undefined,
     })
@@ -132,6 +143,8 @@ describe("AppointmentController.list", () => {
     const request = createRequestMock({
       orgId: "org_123",
       query: {
+        from: "2026-03-13T00:00:00.000Z",
+        to: "2026-03-14T00:00:00.000Z",
         patient_ids: "30e87f1c-a387-4ccd-9904-6980dd8eef2f,4c5d96ee-d4b9-4a5c-bb7f-c1774ba4d09d",
         dentist_user_ids: "0fa67a3f-f95e-4bb6-a788-4d4329b9fd75",
       },
@@ -144,11 +157,40 @@ describe("AppointmentController.list", () => {
 
     expect(listAppointmentsUseCase).toHaveBeenCalledWith({
       orgId: "org_123",
+      from: "2026-03-13T00:00:00.000Z",
+      to: "2026-03-14T00:00:00.000Z",
       patientIds: [
         "30e87f1c-a387-4ccd-9904-6980dd8eef2f",
         "4c5d96ee-d4b9-4a5c-bb7f-c1774ba4d09d",
       ],
       dentistUserIds: ["0fa67a3f-f95e-4bb6-a788-4d4329b9fd75"],
     })
+  })
+
+  it("should reject an invalid timeframe", async () => {
+    const request = createRequestMock({
+      orgId: "org_123",
+      query: {
+        from: "2026-03-14T00:00:00.000Z",
+        to: "2026-03-13T00:00:00.000Z",
+      },
+    })
+    const reply = createReplyMock()
+
+    await expect(controller.list(request, reply)).rejects.toBeInstanceOf(Error)
+    expect(listAppointmentsUseCase).not.toHaveBeenCalled()
+  })
+
+  it("should reject when only one timeframe bound is provided", async () => {
+    const request = createRequestMock({
+      orgId: "org_123",
+      query: {
+        from: "2026-03-13T00:00:00.000Z",
+      },
+    })
+    const reply = createReplyMock()
+
+    await expect(controller.list(request, reply)).rejects.toBeInstanceOf(Error)
+    expect(listAppointmentsUseCase).not.toHaveBeenCalled()
   })
 })

@@ -28,6 +28,8 @@ export class AppointmentController {
 
     const appointments = await listAppointmentsUseCase({
       orgId,
+      from: query.from,
+      to: query.to,
       patientIds: query.patient_ids,
       dentistUserIds: query.dentist_user_ids,
     })

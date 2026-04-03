@@ -52,6 +52,8 @@ export const getAppointmentByIdResponseSchema = appointmentResponseSchema.extend
 })
 
 export const listAppointmentsQuerySchema = z.object({
+  from: z.iso.datetime().optional(),
+  to: z.iso.datetime().optional(),
   patient_ids: z
     .union([z.string(), z.array(z.string())])
     .optional()
@@ -61,6 +63,26 @@ export const listAppointmentsQuerySchema = z.object({
     .optional()
     .transform(normalizeUuidListFilter),
 })
+  .refine((query) => {
+    if (!query.from && !query.to) {
+      return true
+    }
+
+    return Boolean(query.from && query.to)
+  }, {
+    message: "from and to must be provided together",
+    path: ["to"],
+  })
+  .refine((query) => {
+    if (!query.from || !query.to) {
+      return true
+    }
+
+    return new Date(query.to).getTime() > new Date(query.from).getTime()
+  }, {
+    message: "to must be greater than from",
+    path: ["to"],
+  })
 
 export const listAppointmentsResponseSchema = z.array(getAppointmentByIdResponseSchema)
 

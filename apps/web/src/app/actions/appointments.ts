@@ -14,8 +14,16 @@ import {
 
 type ListAppointmentsResponse = z.infer<typeof listAppointmentsResponseSchema>
 
+type ListAppointmentsActionInput = {
+  patientIds?: string[]
+  dentistUserIds?: string[]
+}
+
 // TODO: time frame filter
-export async function listAppointmentsAction(): Promise<ListAppointmentsResponse> {
+export async function listAppointmentsAction({
+  patientIds,
+  dentistUserIds,
+}: ListAppointmentsActionInput = {}): Promise<ListAppointmentsResponse> {
   const { getToken } = await auth()
   const token = await getToken()
 
@@ -23,7 +31,22 @@ export async function listAppointmentsAction(): Promise<ListAppointmentsResponse
     throw new Error("Unauthenticated request")
   }
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointments`, {
+  const params = new URLSearchParams()
+
+  if (patientIds && patientIds.length > 0) {
+    params.set("patient_ids", patientIds.join(","))
+  }
+
+  if (dentistUserIds && dentistUserIds.length > 0) {
+    params.set("dentist_user_ids", dentistUserIds.join(","))
+  }
+
+  const queryString = params.toString()
+  const url = queryString
+    ? `${process.env.NEXT_PUBLIC_API_URL}/appointments?${queryString}`
+    : `${process.env.NEXT_PUBLIC_API_URL}/appointments`
+
+  const response = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
