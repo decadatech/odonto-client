@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 import { Toaster } from '@workspace/ui/components/sonner'
 
@@ -35,6 +36,7 @@ export default function RootLayout({
             {children}
             <Toaster />
           </NuqsAdapter>
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>
