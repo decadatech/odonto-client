@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { Check, ChevronDown } from "lucide-react"
 
 import { Badge } from "@workspace/ui/components/badge"
@@ -10,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@workspace/ui/components/popover"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/ui/components/tooltip"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -64,31 +66,41 @@ export function FacetFilter({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="h-9 border-dashed">
-          <span>{title}</span>
-          {selectedCount > 0 ? (
-            <>
-              <span className="hidden h-4 w-px bg-border sm:block" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal sm:hidden">
-                {selectedCount}
-              </Badge>
-              <div className="hidden items-center gap-1 sm:flex">
-                {selectionSummary.map((label) => (
-                  <Badge
-                    key={`${title}-${label}`}
-                    variant="secondary"
-                    className="rounded-sm px-1 font-normal"
-                  >
-                    {label}
+      <Tooltip delayDuration={500}>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="outline" className="h-9 border-dashed">
+              <span>{title}</span>
+              {selectedCount > 0 ? (
+                <>
+                  <span className="hidden h-4 w-px bg-border sm:block" />
+                  <Badge variant="secondary" className="rounded-sm px-1 font-normal sm:hidden">
+                    {selectedCount}
                   </Badge>
-                ))}
-              </div>
-            </>
-          ) : null}
-          <ChevronDown className="size-4 text-muted-foreground" />
-        </Button>
-      </PopoverTrigger>
+                  <div className="hidden items-center gap-1 sm:flex">
+                    {selectionSummary.map((label) => (
+                      <Badge
+                        key={`${title}-${label}`}
+                        variant="secondary"
+                        className="rounded-sm px-1 font-normal"
+                      >
+                        {label}
+                      </Badge>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+              <ChevronDown className="size-4 text-muted-foreground" />
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+
+        {selectedCount >= 3 && (
+          <TooltipContent className="max-w-[400px] text-center">
+            {selectedOptions.map((item) => item.label).join(", ")}
+          </TooltipContent>
+        )}
+      </Tooltip>
 
       <PopoverContent align="start" className="w-72 p-0">
         <div className="border-b px-3 py-3">

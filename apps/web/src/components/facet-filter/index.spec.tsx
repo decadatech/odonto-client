@@ -7,6 +7,12 @@ vi.mock("@workspace/ui/components/popover", () => ({
   PopoverContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
+vi.mock("@workspace/ui/components/tooltip", () => ({
+  Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  TooltipContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
 import { FacetFilter, type FacetFilterOption } from "@/components/facet-filter"
 
 const STATIC_OPTIONS: FacetFilterOption[] = [
@@ -18,6 +24,7 @@ const PATIENT_OPTIONS: FacetFilterOption[] = [
   { value: "mariana-souza", label: "Mariana Souza" },
   { value: "joao-pedro", label: "João Pedro Alves" },
   { value: "laura-mendes", label: "Laura Mendes" },
+  { value: "carlos-eduardo", label: "Carlos Eduardo" },
 ]
 
 function ControlledFacetFilter() {
@@ -156,5 +163,26 @@ describe("FacetFilter", () => {
 
     expect(screen.getAllByText("2 selecionados").length).toBeGreaterThan(0)
     expect(screen.getByRole("button", { name: "Limpar" }).getAttribute("disabled")).toBeNull()
+  })
+
+  it("should render a tooltip with all selected labels when more than three items are selected", () => {
+    render(
+      <FacetFilter
+        title="Pacientes"
+        options={PATIENT_OPTIONS}
+        allOptions={PATIENT_OPTIONS}
+        selectedValues={[
+          "mariana-souza",
+          "joao-pedro",
+          "laura-mendes",
+          "carlos-eduardo",
+        ]}
+        onToggle={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    expect(screen.getAllByText("4 selecionados").length).toBeGreaterThan(0)
+    expect(screen.getByText("Mariana Souza, João Pedro Alves, Laura Mendes, Carlos Eduardo")).toBeTruthy()
   })
 })
